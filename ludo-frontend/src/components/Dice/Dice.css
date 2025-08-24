@@ -1,0 +1,247 @@
+.dice-container {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  margin: 20px 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border: 2px solid #e3f2fd;
+  text-align: center;
+}
+
+.dice-section {
+  margin-bottom: 24px;
+}
+
+.dice-section h3 {
+  margin: 0 0 16px 0;
+  color: #1565c0;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+/* Roll Button */
+.roll-button {
+  background: linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%);
+  color: white;
+  border: none;
+  padding: 16px 32px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(30, 136, 229, 0.3);
+  margin-bottom: 12px;
+  min-width: 150px;
+}
+
+.roll-button:hover:not(.disabled) {
+  background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(30, 136, 229, 0.4);
+}
+
+.roll-button.rolling {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  animation: pulse-roll 0.6s ease-in-out infinite;
+}
+
+.roll-button.disabled {
+  background: #bdbdbd;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+@keyframes pulse-roll {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.roll-status {
+  color: #424242;
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 8px 0;
+}
+
+/* Dice Face Styling */
+.dice-face {
+  width: 80px;
+  height: 80px;
+  background: #ffffff;
+  border: 3px solid #333;
+  border-radius: 12px;
+  position: relative;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  margin: 0 auto;
+}
+
+.dice-face.six-face {
+  border-color: #d32f2f;
+  background: #ffebee;
+  animation: glow-six 1s ease-in-out;
+}
+
+.dice-face.rolling {
+  animation: spin-dice 0.6s ease-in-out infinite;
+}
+
+@keyframes spin-dice {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes glow-six {
+  0%, 100% { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); }
+  50% { box-shadow: 0 4px 16px rgba(211, 47, 47, 0.5); }
+}
+
+/* Dice Dots Grid */
+.dice-dots {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 24px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 2px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: transparent;
+  margin: auto;
+  transition: all 0.2s ease;
+}
+
+.dot.active {
+  background: #333;
+}
+
+.six-face .dot.active {
+  background: #d32f2f;
+}
+
+/* Dice Number */
+.dice-number {
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  right: 0;
+  font-size: 14px;
+  font-weight: bold;
+  color: #666;
+}
+
+.six-face .dice-number {
+  color: #d32f2f;
+}
+
+/* Current Dice Display */
+.current-dice-display {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 24px;
+}
+
+.current-dice-display h4 {
+  margin: 0 0 16px 0;
+  color: #2e7d32;
+  font-size: 1.2rem;
+}
+
+.dice-results-grid {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.dice-result-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.roll-number {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Dice Summary */
+.dice-summary {
+  background: #e8f5e8;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 16px;
+}
+
+.dice-summary p {
+  margin: 4px 0;
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+.sixes-count {
+  background: #fff3e0;
+  border-left: 4px solid #ff9800;
+  padding: 8px 12px;
+  margin: 8px 0;
+  border-radius: 4px;
+}
+
+.six-highlight {
+  background: #d32f2f;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: bold;
+}
+
+.must-roll-again {
+  color: #d32f2f;
+  font-weight: bold;
+  animation: blink 1s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dice-face {
+    width: 60px;
+    height: 60px;
+  }
+
+  .dice-dots {
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    bottom: 18px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+  }
+
+  .dice-number {
+    font-size: 12px;
+  }
+
+  .dice-results-grid {
+    gap: 12px;
+  }
+}
