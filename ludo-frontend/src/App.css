@@ -10,7 +10,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   min-height: 100vh;
 }
 
@@ -21,23 +21,28 @@ body {
 }
 
 .app-header {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   padding: 20px;
   text-align: center;
-  color: white;
+  color: #333;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .app-header h1 {
   font-size: 2.5rem;
   margin-bottom: 10px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .app-header p {
   font-size: 1.1rem;
-  opacity: 0.9;
+  opacity: 0.8;
   font-weight: 500;
 }
 
@@ -78,4 +83,19 @@ input {
 input:focus {
   outline: none;
   border-color: #007bff;
+}
+
+/* Emergency fallback styles to prevent blue screen */
+.game-page {
+  background: rgba(255, 255, 255, 0.95);
+  min-height: 100vh;
+  border-radius: 0;
+}
+
+.game-page * {
+  color: #333 !important;
+}
+
+.board-container {
+  background: rgba(255, 255, 255, 0.98) !important;
 }

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dice Preview</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .preview-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        h1 {
+            text-align: center;
+            color: #1565c0;
+            margin-bottom: 30px;
+        }
+
+        .dice-section {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .dice-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        /* Dice Face Styling */
+        .dice-face-image {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin: 8px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border: 2px solid #333;
+            background: #fff;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .dice-face-image.six-face {
+            border-color: #ff6b6b;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+        }
+
+        .dice-sprite {
+            width: 100%;
+            height: 100%;
+            background-repeat: no-repeat;
+            background-size: 700% 100%;
+            image-rendering: crisp-edges;
+        }
+
+        /* Dice Dots Overlay System */
+        .dice-dots-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        .dice-dot {
+            width: 8px;
+            height: 8px;
+            background: #000;
+            border-radius: 50%;
+            margin: auto;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .dice-dot.active {
+            opacity: 1;
+        }
+
+        /* Dice dot patterns for each number */
+        .dice-pattern-1 .dice-dot:nth-child(5) { opacity: 1; } /* center */
+
+        .dice-pattern-2 .dice-dot:nth-child(1) { opacity: 1; } /* top-left */
+        .dice-pattern-2 .dice-dot:nth-child(9) { opacity: 1; } /* bottom-right */
+
+        .dice-pattern-3 .dice-dot:nth-child(1) { opacity: 1; } /* top-left */
+        .dice-pattern-3 .dice-dot:nth-child(5) { opacity: 1; } /* center */
+        .dice-pattern-3 .dice-dot:nth-child(9) { opacity: 1; } /* bottom-right */
+
+        .dice-pattern-4 .dice-dot:nth-child(1) { opacity: 1; } /* top-left */
+        .dice-pattern-4 .dice-dot:nth-child(3) { opacity: 1; } /* top-right */
+        .dice-pattern-4 .dice-dot:nth-child(7) { opacity: 1; } /* bottom-left */
+        .dice-pattern-4 .dice-dot:nth-child(9) { opacity: 1; } /* bottom-right */
+
+        .dice-pattern-5 .dice-dot:nth-child(1) { opacity: 1; } /* top-left */
+        .dice-pattern-5 .dice-dot:nth-child(3) { opacity: 1; } /* top-right */
+        .dice-pattern-5 .dice-dot:nth-child(5) { opacity: 1; } /* center */
+        .dice-pattern-5 .dice-dot:nth-child(7) { opacity: 1; } /* bottom-left */
+        .dice-pattern-5 .dice-dot:nth-child(9) { opacity: 1; } /* bottom-right */
+
+        .dice-pattern-6 .dice-dot:nth-child(1) { opacity: 1; } /* top-left */
+        .dice-pattern-6 .dice-dot:nth-child(3) { opacity: 1; } /* top-right */
+        .dice-pattern-6 .dice-dot:nth-child(4) { opacity: 1; } /* middle-left */
+        .dice-pattern-6 .dice-dot:nth-child(6) { opacity: 1; } /* middle-right */
+        .dice-pattern-6 .dice-dot:nth-child(7) { opacity: 1; } /* bottom-left */
+        .dice-pattern-6 .dice-dot:nth-child(9) { opacity: 1; } /* bottom-right */
+
+        .dice-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .dice-label {
+            font-weight: bold;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .rolling {
+            animation: dice-roll 0.6s ease-in-out infinite;
+        }
+
+        @keyframes dice-roll {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(90deg) scale(1.1); }
+            50% { transform: rotate(180deg) scale(1.2); }
+            75% { transform: rotate(270deg) scale(1.1); }
+        }
+
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+
+        .instructions h3 {
+            color: #1565c0;
+            margin-top: 0;
+        }
+
+        .note {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        /* Dice question mark overlay for unrolled dice */
+        .dice-question-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-container">
+        <h1>🎲 Dice Preview - Image-Based System with Dot Patterns</h1>
+
+        <div class="dice-section">
+            <h2>All Dice Faces</h2>
+            <div class="dice-label">This shows how each dice face will look using your LudoDices2.jpg sprite with proper dot patterns:</div>
+
+            <div class="dice-row">
+                <!-- Question Mark Dice (Unrolled) -->
+                <div>
+                    <div class="dice-label">Unrolled (?)</div>
+                    <div class="dice-face-image">
+                        <div class="dice-sprite" style="
+                            background-image: url('./ludo-frontend/src/assets/board/LudoDices2.jpg');
+                            background-position: 0% 0;
+                            background-size: 700% 100%;
+                        "></div>
+                        <div class="dice-question-overlay">?</div>
+                    </div>
+                </div>
+
+                <!-- Dice 1 -->
+                <div>
+                    <div class="dice-label">One</div>
+                    <div class="dice-face-image">
+                        <div class="dice-sprite" style="
+                            background-image: url('./ludo-frontend/src/assets/board/LudoDices2.jpg');
+                            background-position: -14.28% 0;
+                            background-size: 700% 100%;
+                        "></div>
+                        <div class="dice-dots-overlay dice-pattern-1">
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dice 2 -->
+                <div>
+                    <div class="dice-label">Two</div>
+                    <div class="dice-face-image">
+                        <div class="dice-sprite" style="
+                            background-image: url('./ludo-frontend/src/assets/board/LudoDices2.jpg');
+                            background-position: -28.56% 0;
+                            background-size: 700% 100%;
+                        "></div>
+                        <div class="dice-dots-overlay dice-pattern-2">
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dice 3 -->
+                <div>
+                    <div class="dice-label">Three</div>
+                    <div class="dice-face-image">
+                        <div class="dice-sprite" style="
+                            background-image: url('./ludo-frontend/src/assets/board/LudoDices2.jpg');
+                            background-position: -42.84% 0;
+                            background-size: 700% 100%;
+                        "></div>
+                        <div class="dice-dots-overlay dice-pattern-3">
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dice-row">
+                <!-- Dice 4 -->
+                <div>
+                    <div class="dice-label">Four</div>
+                    <div class="dice-face-image">
+                        <div class="dice-sprite" style="
+                            background-image: url('./ludo-frontend/src/assets/board/LudoDices2.jpg');
+                            background-position: -57.12% 0;
+                            background-size: 700% 100%;
+                        "></div>
+                        <div class="dice-dots-overlay dice-pattern-4">
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dice 5 -->
+                <div>
+                    <div class="dice-label">Five</div>
+                    <div class="dice-face-image">
+                        <div class="dice-sprite" style="
+                            background-image: url('./ludo-frontend/src/assets/board/LudoDices2.jpg');
+                            background-position: -71.4% 0;
+                            background-size: 700% 100%;
+                        "></div>
+                        <div class="dice-dots-overlay dice-pattern-5">
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dice 6 (Special highlighting) -->
+                <div>
+                    <div class="dice-label">Six (Special)</div>
+                    <div class="dice-face-image six-face">
+                        <div class="dice-sprite" style="
+                            background-image: url('./ludo-frontend/src/assets/board/LudoDices2.jpg');
+                            background-position: -85.68% 0;
+                            background-size: 700% 100%;
+                        "></div>
+                        <div class="dice-dots-overlay dice-pattern-6">
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                            <div class="dice-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dice-section">
+            <h2>Rolling Animation Preview</h2>
+            <div class="dice-label">This shows the rolling animation effect:</div>
+            <div class="dice-row">
+                <div class="dice-face-image rolling">
+                    <div class="dice-sprite" style="
+                        background-image: url('./ludo-frontend/src/assets/board/LudoDices2.jpg');
+                        background-position: 0% 0;
+                        background-size: 700% 100%;
+                    "></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -4,12 +4,13 @@ import { ludoApi } from '../api/ludoApi';
 
 interface GameContextType {
   gameState: GameStateDTO | null;
-  isRolling: boolean;
-  currentPlayerName: string | null; // Add current player name tracking
+  isRolling: boolean;  // ✅ KEEP: UI state for loading indicator
+  currentPlayerName: string | null;  // ✅ KEEP: Client-side preference
   rollDice: () => Promise<void>;
-  moveToken: (tokenIndex: number, position: number) => Promise<void>;
+  moveToken: (tokenIndex: number) => Promise<void>; // removed position arg for API consistency
+  startGame: () => Promise<void>; // new: start game via API
   setGameState: (gameState: GameStateDTO) => void;
-  setCurrentPlayerName: (name: string) => void; // Add setter for current player name
+  setCurrentPlayerName: (name: string) => void;
   refreshGameState: () => Promise<void>;
 }
 
@@ -23,6 +24,9 @@ export const useGame = () => {
   return context;
 };
 
+// Add alias for useGameContext to maintain compatibility
+export const useGameContext = useGame;
+
 interface GameProviderProps {
   children: React.ReactNode;
   gameId: string;
@@ -30,9 +34,9 @@ interface GameProviderProps {
 
 export const GameProvider: React.FC<GameProviderProps> = ({ children, gameId }) => {
   const [gameState, setGameState] = useState<GameStateDTO | null>(null);
-  const [isRolling, setIsRolling] = useState(false);
+  const [isRolling, setIsRolling] = useState(false);  // ✅ KEEP: UI loading state
   const [currentPlayerName, setCurrentPlayerName] = useState<string | null>(
-    localStorage.getItem('currentPlayerName') // Initialize from localStorage
+    localStorage.getItem('currentPlayerName')
   );
 
   const refreshGameState = useCallback(async () => {
@@ -71,42 +75,69 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children, gameId }) 
   const rollDice = useCallback(async () => {
     if (!gameState || isRolling) return;
 
+    const isMyTurn = gameState && currentPlayerName
+      ? gameState.players[gameState.currentPlayerIndex]?.name === currentPlayerName
+      : false;
+
+    if (!isMyTurn) {
+      alert('❌ It\'s not your turn! Wait for your turn to roll the dice.');
+      return;
+    }
+
+    console.log('🎯 GameContext: Starting dice roll for player index:', gameState.currentPlayerIndex);
     setIsRolling(true);
     try {
       const newGameState = await ludoApi.rollDice(gameId, gameState.currentPlayerIndex);
+      console.log('✅ GameContext: Received new game state from API, dice rolls:', newGameState.currentDiceRolls);
       setGameState(newGameState);
     } catch (error) {
-      console.error('Failed to roll dice:', error);
+      console.error('❌ GameContext: Failed to roll dice:', error);
+      let errorMessage = 'Failed to roll dice';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      alert(`❌ Cannot Roll Dice: ${errorMessage}`);
     } finally {
       setIsRolling(false);
+      console.log('🔄 GameContext: Roll dice operation completed, isRolling set to false');
     }
-  }, [gameState, isRolling, gameId]);
+  }, [gameState, isRolling, gameId, currentPlayerName]);
 
-  const moveToken = useCallback(async (tokenIndex: number, position: number) => {
+  const moveToken = useCallback(async (tokenIndex: number) => {
     if (!gameState) return;
 
     try {
-      const newGameState = await ludoApi.moveToken(
-        gameId,
-        gameState.currentPlayerIndex,
-        tokenIndex,
-        position
-      );
+      const newGameState = await ludoApi.moveToken(gameId, gameState.currentPlayerIndex, tokenIndex);
       setGameState(newGameState);
     } catch (error) {
       console.error('Failed to move token:', error);
+      throw error;
     }
   }, [gameState, gameId]);
+
+  const startGame = useCallback(async () => {
+    try {
+      const updatedState = await ludoApi.startGame(gameId);
+      setGameState(updatedState);
+    } catch (error) {
+      console.error('Failed to start game:', error);
+      alert('Failed to start game. Please try again.');
+    }
+  }, [gameId]);
 
   const value: GameContextType = {
     gameState,
     isRolling,
-    currentPlayerName, // Provide current player name
+    currentPlayerName,
     rollDice,
     moveToken,
+    startGame,
     setGameState,
-    setCurrentPlayerName, // Provide setter for current player name
-    refreshGameState,
+    setCurrentPlayerName: (name: string) => {
+      setCurrentPlayerName(name);
+      localStorage.setItem('currentPlayerName', name);
+    },
+    refreshGameState
   };
 
   return (

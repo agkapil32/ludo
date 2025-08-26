@@ -46,8 +46,18 @@ export const PATH_CELLS: { r: number; c: number }[] = [
 // Player start indices (where each player begins their journey)
 export const PLAYER_START_INDEX = [0, 13, 26, 39]; // Red, Green, Blue, Yellow
 
-// Safe cells (star positions) - corrected for proper Ludo layout
-export const SAFE_GLOBAL_INDICES = new Set([1, 9, 14, 22, 27, 35, 40, 48]);
+// Safe cells (star positions) - corrected based on actual Ludo board layout
+// Stars should be at: position 1 from each start, position 8 from each start, and entry squares
+export const SAFE_GLOBAL_INDICES = new Set([
+  1,   // Red safe square (near red start)
+  8,   // Red second safe square
+  14,  // Green entry square
+  22,  // Green second safe square
+  27,  // Blue entry square
+  35,  // Blue second safe square
+  40,  // Yellow entry square
+  48   // Yellow second safe square
+]);
 
 // Home yard positions for 4 tokens per player (pixel coordinates) - corrected positioning
 export const HOME_CLUSTERS: { x: number; y: number }[][] = [
@@ -85,10 +95,20 @@ export const HOME_CLUSTERS: { x: number; y: number }[][] = [
 export function pathIndexToPixel(index: number): { x: number; y: number } {
   if (index < 0 || index >= PATH_CELLS.length) {
     // Return center position for invalid indices
+    console.warn(`Invalid path index: ${index}, PATH_CELLS.length: ${PATH_CELLS.length}`);
     return { x: BOARD_PX/2, y: BOARD_PX/2 };
   }
 
-  const { r, c } = PATH_CELLS[index % 52];
+  // Use actual array length instead of hardcoded 52
+  const safeIndex = index % PATH_CELLS.length;
+  const pathCell = PATH_CELLS[safeIndex];
+
+  if (!pathCell) {
+    console.error(`PATH_CELLS[${safeIndex}] is undefined. Array length: ${PATH_CELLS.length}`);
+    return { x: BOARD_PX/2, y: BOARD_PX/2 };
+  }
+
+  const { r, c } = pathCell;
   return {
     x: c * CELL_SIZE + CELL_SIZE / 2,
     y: r * CELL_SIZE + CELL_SIZE / 2,
@@ -97,7 +117,8 @@ export function pathIndexToPixel(index: number): { x: number; y: number } {
 
 // Convert logical position to global path index
 export function logicalToGlobal(playerStartOffset: number, logicalPos: number): number {
-  return (playerStartOffset + logicalPos) % 52;
+
+  return (playerStartOffset + logicalPos) % PATH_CELLS.length;
 }
 
 // Get home token position for tokens still in yard

@@ -10,7 +10,7 @@ const GameControls: React.FC = () => {
 
   const currentTurnPlayer = gameState.players[gameState.currentPlayerIndex];
   const currentDiceRolls = gameState.currentDiceRolls || [];
-  const consecutiveSixes = currentDiceRolls.filter(roll => roll.value === 6).length;
+  const consecutiveSixes = currentDiceRolls.filter(roll => roll.move === 6).length;
 
   // Determine if current user is the one whose turn it is
   const isMyTurn = currentPlayerName === currentTurnPlayer.name;
@@ -33,7 +33,7 @@ const GameControls: React.FC = () => {
     }
 
     const lastRoll = currentDiceRolls[currentDiceRolls.length - 1];
-    if (lastRoll.value === 6 && currentDiceRolls.length < 3) {
+    if (lastRoll.move === 6 && currentDiceRolls.length < 3) {
       if (isMyTurn) {
         return "You rolled a 6! Must roll again.";
       } else {
@@ -84,13 +84,13 @@ const GameControls: React.FC = () => {
           <p>Available dice values this turn:</p>
           <p className="dice-values">
             {currentDiceRolls.map((roll, index) => (
-              <span key={index} className={`dice-value ${roll.value === 6 ? 'six-value' : ''}`}>
-                {roll.value}
+              <span key={index} className={`dice-value ${roll.move === 6 ? 'six-value' : ''}`}>
+                {roll.move}
               </span>
             ))}
           </p>
           <p className="move-note">
-            {currentDiceRolls.some(roll => roll.value === 6) && currentDiceRolls.length < 3
+            {currentDiceRolls.some(roll => roll.move === 6) && currentDiceRolls.length < 3
               ? "⚠️ You have sixes - must roll again before moving!"
               : "✅ Click on your tokens to move them using these values"}
           </p>
