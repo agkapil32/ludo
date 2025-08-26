@@ -22,118 +22,136 @@ public class LudoRule implements GameRules {
 
   /**
    * Checks if the move is valid for the given player and token.
-   *
-   * @param gameState the current game state
-   * @param playerIndex the index of the player
-   * @param tokenIndex the index of the token
-   * @return true if the move is valid, false otherwise
    */
   @Override
   public boolean isValidMove(GameState gameState, int playerIndex, int tokenIndex) {
-
     if (!Objects.equals(gameState.getCurrentPlayerIndex(), playerIndex)) {
+      System.out.println("❌ [LudoRule] Wrong player turn");
       throw new InvalidActionException("Not a turn for this playerIndex");
     }
-    if (gameState.isEnd()) throw new InvalidActionException("Game has ended");
+    
+    if (gameState.isEnd()) {
+      System.out.println("❌ [LudoRule] Game ended");
+      throw new InvalidActionException("Game has ended");
+    }
 
     int used = 0;
     for (Dice dice : gameState.getCurrentDiceRolls()) {
-      if (dice.isUsed()) used++;
-      else {
+      if (dice.isUsed()) {
+        used++;
+      } else {
         Token result = LudoUtils.findTokenByIndex(gameState, playerIndex, tokenIndex);
         if (result == null) {
-          logger.warn(
-              "Token not found for playerIndex {} and tokenIndex {}", playerIndex, tokenIndex);
+          System.out.println("❌ [LudoRule] Token not found - Player: " + playerIndex + ", Token: " + tokenIndex);
           throw new InvalidActionException("Token not found for player or token index");
         }
-        if (canMoveToken(result, dice)) return true;
+
+        if (canMoveToken(result, dice)) {
+          System.out.println("✅ [LudoRule] Valid move with dice: " + dice.getMove());
+          return true;
+        }
       }
     }
+
     if (used == 3) {
-      logger.warn(
-          "All dice used for playerIndex {} in game {}", playerIndex, gameState.getGameId());
+      System.out.println("🚫 [LudoRule] All dice used");
     }
-    // If no valid move found, throw exception
+
+    System.out.println("❌ [LudoRule] No valid move found");
     throw new InvalidActionException("Invalid move for player or token");
   }
 
   /**
    * Checks if a token can be moved with the given dice.
-   *
-   * @param token the token to move
-   * @param dice the dice roll
-   * @return true if the token can be moved, false otherwise
    */
   private boolean canMoveToken(Token token, Dice dice) {
-    if (token.isOpen() && token.getGlobalPosition() + dice.getMove() < endPosition + 1) return true;
-    else return !token.isOpen() && dice.getMove() == 6;
+    if (token.isOpen() && token.getGlobalPosition() + dice.getMove() < endPosition + 1) {
+      return true;
+    } else if (!token.isOpen() && dice.getMove() == 6) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   /**
    * Cuts the opponent's token if possible.
-   *
-   * @param gameState the current game state
-   * @param token the token of the current player
-   * @return true if an opponent's token was cut, false otherwise
    */
   @Override
   public boolean cutIfPossible(GameState gameState, Token token) {
     boolean flag = false;
+    int cutsCount = 0;
+
     for (var playerPositions : gameState.getPlayerPositions().values()) {
       for (Token playerToken : playerPositions) {
         if (playerToken.getColor() != token.getColor()
             && token.getGlobalPosition() == playerToken.getGlobalPosition()
             && !playerToken.isSafeCell()) {
-          logger.info(
-              "Captured other player's token, playerToken: {} CurrentToken: {}",
-              playerToken,
-              token);
+
           playerToken.setCurrentPosition(-1);
           flag = true;
+          cutsCount++;
         }
       }
     }
+
+    if (cutsCount > 0) {
+      System.out.println("✂️ [LudoRule] Cut " + cutsCount + " opponent token(s)");
+    }
+
     return flag;
   }
 
   /**
    * Checks if the current player gets an extra turn.
-   *
-   * @param gameState the current game state
-   * @return true if the player gets an extra turn, false otherwise
    */
   @Override
   public boolean isExtraTurn(GameState gameState) {
     List<Dice> rolls = gameState.getCurrentDiceRolls();
     int sixes = (int) rolls.stream().filter(Dice::isSix).count();
-    return sixes == rolls.size();
+    boolean isExtra = sixes == rolls.size();
+
+    if (isExtra) {
+      System.out.println("🔄 [LudoRule] Extra turn - all dice are sixes");
+    }
+
+    return isExtra;
   }
 
   /**
    * Changes the turn to the next player.
-   *
-   * @param gameState the current game state
-   * @return false
    */
   @Override
   public boolean changeTurn(GameState gameState) {
-    if (gameState.isGameFinished())
+    if (gameState.isGameFinished()) {
+      System.out.println("❌ [LudoRule] Cannot change turn - game finished");
       throw new InvalidActionException("Cannot change turn, Game is already finished");
+    }
 
-    int actualPlayerCount = gameState.getPlayers().size(); // Use actual number of players
+    int actualPlayerCount = gameState.getPlayers().size();
     int increment = 1;
+
     while (true) {
       int currentPlayerIndex = (gameState.getCurrentPlayerIndex() + increment) % actualPlayerCount;
+
       if (!gameState.hasPlayerWon(currentPlayerIndex)) {
-        gameState.setCurrentPlayerId(gameState.getPlayers().get(currentPlayerIndex).getId());
+        String newPlayerId = gameState.getPlayers().get(currentPlayerIndex).getId();
+        String newPlayerName = gameState.getPlayers().get(currentPlayerIndex).getName();
+
+        gameState.setCurrentPlayerId(newPlayerId);
         gameState.setCurrentPlayerIndex(currentPlayerIndex);
+
+        System.out.println("🔄 [LudoRule] Turn changed to: " + newPlayerName + " (Index: " + currentPlayerIndex + ")");
         break;
       }
+
       increment++;
-      if (increment > actualPlayerCount)
-        throw new InvalidActionException(
-            "[Unexpected] Unable to change turn gameId: " + gameState.getGameId());
+      if (increment > actualPlayerCount) {
+        System.out.println("❌ [LudoRule] Unable to find next player");
+        throw new InvalidActionException("[Unexpected] Unable to change turn gameId: " + gameState.getGameId());
+      }
     }
+
     return false;
   }
 }

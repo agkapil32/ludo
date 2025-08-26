@@ -1,0 +1,320 @@
+/* Game Status Container */
+.game-status {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 16px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.game-status.transitioning {
+  animation: statusTransition 0.5s ease-in-out;
+}
+
+@keyframes statusTransition {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+/* Current Turn Section */
+.current-turn-section {
+  margin-bottom: 16px;
+}
+
+.current-turn-section h3 {
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+  color: #495057;
+  font-weight: 600;
+}
+
+/* Player Turn Indicator */
+.player-turn-indicator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.03);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.player-turn-indicator.my-turn {
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.1) 0%, rgba(33, 150, 243, 0.05) 100%);
+  border-color: #2196f3;
+  animation: myTurnGlow 2s ease-in-out infinite;
+}
+
+@keyframes myTurnGlow {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
+  }
+  50% {
+    box-shadow: 0 4px 16px rgba(33, 150, 243, 0.4);
+  }
+}
+
+/* Player Avatar */
+.player-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Player Color Classes */
+.player-turn-indicator.red .player-avatar {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+}
+
+.player-turn-indicator.blue .player-avatar {
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+}
+
+.player-turn-indicator.green .player-avatar {
+  background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+}
+
+.player-turn-indicator.yellow .player-avatar {
+  background: linear-gradient(135deg, #ffeb3b 0%, #fbc02d 100%);
+  color: #333;
+}
+
+/* Player Info */
+.player-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.player-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #212529;
+}
+
+.turn-status {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.my-turn .turn-status {
+  color: #2196f3;
+  font-weight: 600;
+}
+
+/* Game Phase Section */
+.game-phase-section {
+  margin-bottom: 16px;
+}
+
+.phase-indicator {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.phase-indicator.phase-waiting {
+  background: rgba(108, 117, 125, 0.1);
+  color: #6c757d;
+  border: 1px solid rgba(108, 117, 125, 0.2);
+}
+
+.phase-indicator.phase-rolling {
+  background: rgba(255, 152, 0, 0.1);
+  color: #ff9800;
+  border: 1px solid rgba(255, 152, 0, 0.2);
+  animation: rollingPulse 1s ease-in-out infinite;
+}
+
+.phase-indicator.phase-moving {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+  border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.phase-indicator.phase-turn-ending {
+  background: rgba(33, 150, 243, 0.1);
+  color: #2196f3;
+  border: 1px solid rgba(33, 150, 243, 0.2);
+}
+
+.phase-indicator.phase-game-over {
+  background: rgba(156, 39, 176, 0.1);
+  color: #9c27b0;
+  border: 1px solid rgba(156, 39, 176, 0.2);
+  animation: gameOverCelebration 2s ease-in-out infinite;
+}
+
+@keyframes rollingPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes gameOverCelebration {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 4px rgba(156, 39, 176, 0.2);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(156, 39, 176, 0.4);
+  }
+}
+
+/* Turn Statistics */
+.turn-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+  padding: 8px 0;
+  border-top: 1px solid #e9ecef;
+  padding-top: 12px;
+}
+
+.stats-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stats-label {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.stats-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.stats-value.bonus {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+  animation: bonusGlow 1s ease-in-out;
+}
+
+.stats-value.critical {
+  background: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+  animation: criticalBlink 1s ease-in-out infinite;
+}
+
+@keyframes bonusGlow {
+  0% { background: rgba(76, 175, 80, 0.1); }
+  50% { background: rgba(76, 175, 80, 0.3); }
+  100% { background: rgba(76, 175, 80, 0.1); }
+}
+
+@keyframes criticalBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Quick Actions */
+.quick-actions {
+  background: rgba(33, 150, 243, 0.05);
+  border: 1px solid rgba(33, 150, 243, 0.1);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-top: 8px;
+}
+
+.quick-actions small {
+  color: #2196f3;
+  font-weight: 500;
+  font-size: 0.8rem;
+}
+
+/* Game Phase Specific Styles */
+.game-status.rolling {
+  border-color: #ff9800;
+}
+
+.game-status.moving {
+  border-color: #4caf50;
+}
+
+.game-status.turn-ending {
+  border-color: #2196f3;
+}
+
+.game-status.game-over {
+  border-color: #9c27b0;
+  background: linear-gradient(135deg, rgba(156, 39, 176, 0.05) 0%, rgba(233, 30, 99, 0.05) 100%);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .game-status {
+    padding: 12px;
+    margin: 12px 0;
+  }
+
+  .player-turn-indicator {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .player-avatar {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+  }
+
+  .turn-stats {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .turn-stats {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .stats-item {
+    justify-content: space-between;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .game-status.transitioning,
+  .player-turn-indicator.my-turn,
+  .phase-indicator.phase-rolling,
+  .phase-indicator.phase-game-over,
+  .stats-value.bonus,
+  .stats-value.critical {
+    animation: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .game-status {
+    border: 2px solid #000;
+  }
+
+  .player-turn-indicator.my-turn {
+    border: 2px solid #0066cc;
+  }
+}

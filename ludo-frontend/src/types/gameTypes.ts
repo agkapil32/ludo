@@ -1,22 +1,28 @@
 // Type definitions for the Ludo game
 
+// ✅ FIXED: DTOs that match backend exactly
 export interface DiceDTO {
-  value: number;
-  // Add other dice properties as needed
+  move: number;      // Matches backend "move" field
+  isUsed: boolean;   // Matches backend "isUsed" field
+  // Convenience getters for frontend
+  value?: number;    // Can be computed from move
+  used?: boolean;    // Can be computed from isUsed
 }
 
 export interface PlayerDTO {
   id: string;
   name: string;
   color: string;
-  // Add other player properties as needed
 }
 
 export interface TokenDTO {
-  id: string;
-  position: number;
-  finished: boolean; // Add finished property for completed tokens
-  // Add other token properties as needed
+  tokenIndex: number;        // Matches backend
+  currentPosition: number;   // Matches backend
+  color: string;            // Matches backend
+  // Computed properties (derived from backend data)
+  isOpen?: boolean;         // Computed: currentPosition !== -1
+  isFinished?: boolean;     // Computed: backend calculates this
+  globalPosition?: number;  // Computed: backend calculates this
 }
 
 export interface GameStateDTO {
@@ -29,11 +35,13 @@ export interface GameStateDTO {
   currentDiceRolls: DiceDTO[];
   winners: PlayerDTO[];
   playerPositions: Record<number, TokenDTO[]>;
+  gameStatus?: string;  // Add missing field from backend
 }
 
-export interface RollDiceResponse {
-  gameState: GameStateDTO;
-  canRollAgain: boolean;
-  mustRollAgain: boolean; // true when player rolled a 6
-  turnEnded: boolean; // true when three 6s were rolled
-}
+// ✅ REMOVED: No longer needed - backend handles all logic
+// export interface RollDiceResponse {
+//   gameState: GameStateDTO;
+//   canRollAgain: boolean;
+//   mustRollAgain: boolean;
+//   turnEnded: boolean;
+// }

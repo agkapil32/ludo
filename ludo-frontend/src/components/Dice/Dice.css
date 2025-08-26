@@ -6,6 +6,11 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   border: 2px solid #e3f2fd;
   text-align: center;
+  transition: all 0.3s ease;
+}
+
+.dice-container:hover {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
 }
 
 .dice-section {
@@ -64,98 +69,383 @@
   margin: 8px 0;
 }
 
-/* Dice Face Styling */
-.dice-face {
-  width: 80px;
-  height: 80px;
-  background: #ffffff;
-  border: 3px solid #333;
-  border-radius: 12px;
-  position: relative;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+/* Enhanced Roll Status Messages */
+.roll-status-enhanced {
+  color: #333333;
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 12px 0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
-  margin: 0 auto;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.dice-face.six-face {
-  border-color: #d32f2f;
-  background: #ffebee;
+.roll-status-enhanced.warning {
+  color: #f57c00;
+  background: rgba(245, 124, 0, 0.1);
+  border-color: rgba(245, 124, 0, 0.2);
+  animation: pulse-warning 2s ease-in-out infinite;
+}
+
+.roll-status-enhanced.success {
+  color: #2e7d32;
+  background: rgba(46, 125, 50, 0.1);
+  border-color: rgba(46, 125, 50, 0.2);
+  animation: pulse-success 1s ease-in-out;
+}
+
+.roll-status-enhanced.error {
+  color: #d32f2f;
+  background: rgba(211, 47, 47, 0.1);
+  border-color: rgba(211, 47, 47, 0.2);
+  animation: shake 0.5s ease-in-out;
+}
+
+.roll-status-enhanced.waiting {
+  color: #666;
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.1);
+  animation: pulse-waiting 2s ease-in-out infinite;
+}
+
+@keyframes pulse-warning {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+@keyframes pulse-success {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+@keyframes pulse-waiting {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Enhanced Roll Buttons */
+.roll-button-enhanced {
+  background: linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%);
+  color: white;
+  border: none;
+  padding: 16px 32px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(30, 136, 229, 0.3);
+  margin: 12px 0;
+  min-width: 180px;
+  position: relative;
+  overflow: hidden;
+}
+
+.roll-button-enhanced:hover:not(.disabled) {
+  background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(30, 136, 229, 0.4);
+}
+
+.roll-button-enhanced.rolling {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  animation: pulse-roll 0.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.roll-button-enhanced.disabled {
+  background: #bdbdbd;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* ✅ CRITICAL: New turn control styling */
+.roll-button-enhanced.not-your-turn {
+  background: linear-gradient(135deg, #757575 0%, #616161 100%);
+  cursor: not-allowed;
+  box-shadow: none;
+  opacity: 0.7;
+}
+
+.roll-button-enhanced.not-your-turn::before {
+  content: "🚫";
+  position: absolute;
+  top: 50%;
+  left: 16px;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+}
+
+.roll-button-enhanced.bonus-roll {
+  background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+  animation: bonus-pulse 1s ease-in-out infinite;
+}
+
+.bonus-indicator {
+  margin-left: 8px;
+  animation: star-twinkle 1.5s ease-in-out infinite;
+}
+
+@keyframes bonus-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.5);
+  }
+}
+
+@keyframes star-twinkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.2); }
+}
+
+/* Enhanced Bonus Indicator */
+.bonus-indicator {
+  animation: sparkle 1s ease-in-out infinite;
+  font-size: 1.2em;
+  display: inline-block;
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3) rotate(180deg);
+    opacity: 0.8;
+  }
+}
+
+/* Enhanced Dice Face Styling */
+.dice-face-image {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.dice-face-small {
+  width: 40px;
+  height: 40px;
+}
+
+.dice-face-medium {
+  width: 60px;
+  height: 60px;
+}
+
+.dice-face-large {
+  width: 100px;
+  height: 100px;
+}
+
+.dice-face-image.rolling {
+  animation: enhanced-roll 0.15s ease-in-out infinite;
+}
+
+.dice-face-image.six-face {
   animation: glow-six 1s ease-in-out;
 }
 
-.dice-face.rolling {
-  animation: spin-dice 0.6s ease-in-out infinite;
+.dice-face-image.special-value {
+  animation: special-glow 1.5s ease-in-out infinite;
 }
 
-@keyframes spin-dice {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.dice-face-image.question-face {
+  animation: question-pulse 2s ease-in-out infinite;
+}
+
+@keyframes enhanced-roll {
+  0% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(90deg) scale(0.95); }
+  50% { transform: rotate(180deg) scale(1.05); }
+  75% { transform: rotate(270deg) scale(0.95); }
+  100% { transform: rotate(360deg) scale(1); }
 }
 
 @keyframes glow-six {
-  0%, 100% { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); }
-  50% { box-shadow: 0 4px 16px rgba(211, 47, 47, 0.5); }
+  0%, 100% {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border: 2px solid transparent;
+  }
+  50% {
+    box-shadow: 0 6px 20px rgba(211, 47, 47, 0.6);
+    border: 2px solid #d32f2f;
+  }
 }
 
-/* Dice Dots Grid */
-.dice-dots {
+@keyframes special-glow {
+  0%, 100% {
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+  }
+  50% {
+    box-shadow: 0 6px 16px rgba(76, 175, 80, 0.6);
+  }
+}
+
+@keyframes question-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Enhanced Dice Sprite */
+.dice-sprite {
+  width: 100%;
+  height: 100%;
+  transition: all 0.3s ease;
+}
+
+/* Enhanced Overlays */
+.dice-question-overlay {
   position: absolute;
-  top: 8px;
-  left: 8px;
-  right: 8px;
-  bottom: 24px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2em;
+  font-weight: bold;
+  color: #666;
+  pointer-events: none;
+  animation: question-bounce 1s ease-in-out infinite;
+}
+
+@keyframes question-bounce {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.1); }
+}
+
+.dice-dots-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+  padding: 8px;
   gap: 2px;
 }
 
-.dot {
-  width: 12px;
-  height: 12px;
+.dice-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #333;
   border-radius: 50%;
-  background: transparent;
-  margin: auto;
-  transition: all 0.2s ease;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.dot.active {
-  background: #333;
+/* Pattern 1 - Single dot in center */
+.dice-pattern-1 .dice-dot:nth-child(5) {
+  opacity: 1;
 }
 
-.six-face .dot.active {
-  background: #d32f2f;
+/* Pattern 2 - Two dots diagonal */
+.dice-pattern-2 .dice-dot:nth-child(3),
+.dice-pattern-2 .dice-dot:nth-child(7) {
+  opacity: 1;
 }
 
-/* Dice Number */
-.dice-number {
-  position: absolute;
-  bottom: 4px;
-  left: 0;
-  right: 0;
-  font-size: 14px;
-  font-weight: bold;
-  color: #666;
+/* Pattern 3 - Three dots diagonal */
+.dice-pattern-3 .dice-dot:nth-child(3),
+.dice-pattern-3 .dice-dot:nth-child(5),
+.dice-pattern-3 .dice-dot:nth-child(7) {
+  opacity: 1;
 }
 
-.six-face .dice-number {
-  color: #d32f2f;
+/* Pattern 4 - Four corners */
+.dice-pattern-4 .dice-dot:nth-child(1),
+.dice-pattern-4 .dice-dot:nth-child(3),
+.dice-pattern-4 .dice-dot:nth-child(7),
+.dice-pattern-4 .dice-dot:nth-child(9) {
+  opacity: 1;
 }
 
-/* Current Dice Display */
+/* Pattern 5 - Four corners + center */
+.dice-pattern-5 .dice-dot:nth-child(1),
+.dice-pattern-5 .dice-dot:nth-child(3),
+.dice-pattern-5 .dice-dot:nth-child(5),
+.dice-pattern-5 .dice-dot:nth-child(7),
+.dice-pattern-5 .dice-dot:nth-child(9) {
+  opacity: 1;
+}
+
+/* Pattern 6 - All six dots */
+.dice-pattern-6 .dice-dot:nth-child(1),
+.dice-pattern-6 .dice-dot:nth-child(2),
+.dice-pattern-6 .dice-dot:nth-child(3),
+.dice-pattern-6 .dice-dot:nth-child(7),
+.dice-pattern-6 .dice-dot:nth-child(8),
+.dice-pattern-6 .dice-dot:nth-child(9) {
+  opacity: 1;
+}
+
+/* Enhanced main dice display */
+.dice-main-section {
+  text-align: center;
+}
+
+.dice-display-area {
+  margin: 20px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Enhanced Current Dice Display */
 .current-dice-display {
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border-radius: 12px;
   padding: 20px;
   margin-top: 24px;
+  border: 1px solid #dee2e6;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .current-dice-display h4 {
   margin: 0 0 16px 0;
   color: #2e7d32;
   font-size: 1.2rem;
+  font-weight: 600;
+  text-align: center;
+  border-bottom: 2px solid rgba(46, 125, 50, 0.2);
+  padding-bottom: 8px;
 }
 
+/* Enhanced Dice Results Grid */
 .dice-results-grid {
   display: flex;
   justify-content: center;
@@ -169,79 +459,187 @@
   flex-direction: column;
   align-items: center;
   gap: 8px;
-}
-
-.roll-number {
-  font-size: 0.9rem;
-  color: #666;
-  font-weight: 500;
-}
-
-/* Dice Summary */
-.dice-summary {
-  background: #e8f5e8;
-  border-radius: 8px;
   padding: 12px;
-  margin-top: 16px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
 }
 
-.dice-summary p {
-  margin: 4px 0;
-  color: #2e7d32;
-  font-weight: 500;
+.dice-result-item.available {
+  background: rgba(76, 175, 80, 0.1);
+  border-color: rgba(76, 175, 80, 0.3);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
 }
 
-.sixes-count {
-  background: #fff3e0;
-  border-left: 4px solid #ff9800;
-  padding: 8px 12px;
-  margin: 8px 0;
-  border-radius: 4px;
+.dice-result-item.used {
+  background: rgba(158, 158, 158, 0.1);
+  border-color: rgba(158, 158, 158, 0.3);
+  opacity: 0.7;
 }
 
-.six-highlight {
-  background: #d32f2f;
-  color: white;
-  padding: 2px 8px;
+.dice-result-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dice-result-item.available:hover {
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+/* Usage Status Indicators */
+.usage-status {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 8px;
   border-radius: 12px;
-  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.must-roll-again {
-  color: #d32f2f;
-  font-weight: bold;
-  animation: blink 1s ease-in-out infinite;
+.usage-status.available {
+  background: rgba(76, 175, 80, 0.2);
+  color: #2e7d32;
+  animation: pulse-available 2s ease-in-out infinite;
 }
 
-@keyframes blink {
+.usage-status.used {
+  background: rgba(158, 158, 158, 0.2);
+  color: #757575;
+}
+
+@keyframes pulse-available {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  50% { opacity: 0.7; }
+}
+
+/* Six Bonus Indicator */
+.six-bonus {
+  font-size: 0.7rem;
+  color: #ff6f00;
+  font-weight: bold;
+  background: rgba(255, 111, 0, 0.1);
+  padding: 2px 6px;
+  border-radius: 8px;
+  animation: bonus-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes bonus-glow {
+  0%, 100% {
+    background: rgba(255, 111, 0, 0.1);
+    transform: scale(1);
+  }
+  50% {
+    background: rgba(255, 111, 0, 0.2);
+    transform: scale(1.05);
+  }
+}
+
+/* Can Roll Again Indicator */
+.can-roll-again {
+  color: #ff6f00;
+  font-weight: bold;
+  animation: can-roll-pulse 1s ease-in-out infinite;
+}
+
+@keyframes can-roll-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Enhanced Roll Button States for Bonus Rolls */
+.roll-button-enhanced.bonus-roll {
+  background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+  animation: bonus-pulse 1s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+.roll-button-enhanced.bonus-roll::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 70%);
+  animation: shine 2s ease-in-out infinite;
+}
+
+@keyframes shine {
+  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+/* Current Dice Display Enhanced */
+.current-dice-display h4 {
+  margin: 0 0 16px 0;
+  color: #2e7d32;
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-align: center;
+  border-bottom: 2px solid rgba(46, 125, 50, 0.2);
+  padding-bottom: 8px;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .dice-face {
-    width: 60px;
-    height: 60px;
+  .dice-container {
+    padding: 16px;
+    margin: 10px 0;
   }
 
-  .dice-dots {
-    top: 6px;
-    left: 6px;
-    right: 6px;
-    bottom: 18px;
+  .dice-face-large {
+    width: 80px;
+    height: 80px;
   }
 
-  .dot {
-    width: 8px;
-    height: 8px;
-  }
-
-  .dice-number {
-    font-size: 12px;
+  .roll-button-enhanced {
+    min-width: 150px;
+    padding: 12px 24px;
+    font-size: 1rem;
   }
 
   .dice-results-grid {
     gap: 12px;
   }
+}
+
+@media (max-width: 480px) {
+  .dice-face-large {
+    width: 60px;
+    height: 60px;
+  }
+
+  .roll-button-enhanced {
+    min-width: 120px;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Accessibility Enhancements */
+@media (prefers-reduced-motion: reduce) {
+  .dice-face-image.rolling {
+    animation: none;
+  }
+
+  .bonus-indicator,
+  .special-value-indicator {
+    animation: none;
+  }
+
+  .roll-button-enhanced.bonus-roll {
+    animation: none;
+  }
+}
+
+/* Focus states for better accessibility */
+.roll-button-enhanced:focus {
+  outline: 2px solid #42a5f5;
+  outline-offset: 2px;
+}
+
+.roll-button-enhanced:focus:not(.disabled) {
+  box-shadow: 0 6px 16px rgba(30, 136, 229, 0.4), 0 0 0 2px #42a5f5;
 }
