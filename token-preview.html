@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ludo Token Preview & Export</title>
+  <style>
+    body {
+      font-family: Inter, system-ui, Arial, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      margin: 0;
+      padding: 24px;
+      min-height: 100vh;
+      color: #223;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      padding: 24px;
+    }
+    h1 { margin: 0 0 8px; font-size: 22px; }
+    .sub { color: #556; margin-bottom: 24px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #fafafa;
+    }
+    .stage {
+      height: 220px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: #f3f4f6;
+      border: 1px dashed #e5e7eb;
+      position: relative;
+      overflow: hidden;
+    }
+    .actions { display: flex; gap: 8px; }
+    button {
+      appearance: none;
+      border: 1px solid #1f2937;
+      background: #111827;
+      color: white;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button.secondary {
+      background: white;
+      color: #111827;
+      border-color: #cbd5e1;
+    }
+    .hint { font-size: 12px; color: #667; }
+    .preview-bg {
+      position: absolute;
+      inset: 0;
+      background: repeating-conic-gradient(#e5e7eb 0 25%, #f9fafb 0 50%) 50%/20px 20px;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Glossy 3D Ludo Token (Pawn) Preview</h1>
+    <div class="sub">Transparent background export (PNG). White base with soft shadows and reflections. Also previewed in Red, Green, Yellow, and Blue.</div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="stage">
+          <div class="preview-bg"></div>
+          <svg id="token-white" viewBox="0 0 128 160" width="200" height="200"></svg>
+        </div>
+        <div class="actions">
+          <button onclick="downloadPNG('token-white', 'token-white-512.png', 512)">Download 512px</button>
+          <button class="secondary" onclick="downloadPNG('token-white', 'token-white-256.png', 256)">256px</button>
+        </div>
+        <div class="hint">White (#FFFFFF)</div>
+      </div>
+
+      <div class="card">
+        <div class="stage">
+          <div class="preview-bg"></div>
+          <svg id="token-red" viewBox="0 0 128 160" width="200" height="200"></svg>
+        </div>
+        <div class="actions">
+          <button onclick="downloadPNG('token-red', 'token-red-512.png', 512)">Download 512px</button>
+          <button class="secondary" onclick="downloadPNG('token-red', 'token-red-256.png', 256)">256px</button>
+        </div>
+        <div class="hint">Red (#FF0000)</div>
+      </div>
+
+      <div class="card">
+        <div class="stage">
+          <div class="preview-bg"></div>
+          <svg id="token-green" viewBox="0 0 128 160" width="200" height="200"></svg>
+        </div>
+        <div class="actions">
+          <button onclick="downloadPNG('token-green', 'token-green-512.png', 512)">Download 512px</button>
+          <button class="secondary" onclick="downloadPNG('token-green', 'token-green-256.png', 256)">256px</button>
+        </div>
+        <div class="hint">Green (#008000)</div>
+      </div>
+
+      <div class="card">
+        <div class="stage">
+          <div class="preview-bg"></div>
+          <svg id="token-yellow" viewBox="0 0 128 160" width="200" height="200"></svg>
+        </div>
+        <div class="actions">
+          <button onclick="downloadPNG('token-yellow', 'token-yellow-512.png', 512)">Download 512px</button>
+          <button class="secondary" onclick="downloadPNG('token-yellow', 'token-yellow-256.png', 256)">256px</button>
+        </div>
+        <div class="hint">Yellow (#FFD700)</div>
+      </div>
+
+      <div class="card">
+        <div class="stage">
+          <div class="preview-bg"></div>
+          <svg id="token-blue" viewBox="0 0 128 160" width="200" height="200"></svg>
+        </div>
+        <div class="actions">
+          <button onclick="downloadPNG('token-blue', 'token-blue-512.png', 512)">Download 512px</button>
+          <button class="secondary" onclick="downloadPNG('token-blue', 'token-blue-256.png', 256)">256px</button>
+        </div>
+        <div class="hint">Blue (#0000FF)</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Build a glossy pawn into a target SVG with a given base color
+    function buildPawn(svg, baseColor) {
+      const ns = 'http://www.w3.org/2000/svg';
+      const defs = document.createElementNS(ns, 'defs');
+
+      const id = 'pawn-' + Math.random().toString(36).slice(2);
+
+      // Color helpers
+      const hexToRgb = (hex) => {
+        const h = hex.replace('#','');
+        const bigint = parseInt(h, 16);
+        return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
+      };
+      const clamp = (v)=> Math.max(0, Math.min(255, v));
+      const shade = (rgb, f)=> ({ r: clamp(rgb.r * f), g: clamp(rgb.g * f), b: clamp(rgb.b * f) });
+      const toHex = ({r,g,b})=> `#${[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('')}`;
+
+      const rgb = hexToRgb(baseColor);
+      const rgbLight = shade(rgb, 1.15);
+      const rgbDark = shade(rgb, 0.55);
+      const rgbMid = shade(rgb, 0.85);
+
+      const col = toHex(rgb);
+      const colLight = toHex(rgbLight);
+      const colDark = toHex(rgbDark);
+      const colMid = toHex(rgbMid);
+
+      // Gradients
+      const radial = document.createElementNS(ns, 'radialGradient');
+      radial.setAttribute('id', id + '-head');
+      radial.setAttribute('cx', '0.35');
+      radial.setAttribute('cy', '0.3');
+      radial.setAttribute('r', '0.8');
+      radial.innerHTML = `
+        <stop offset="0%" stop-color="${colLight}" />
+        <stop offset="45%" stop-color="${col}" />
+        <stop offset="85%" stop-color="${colDark}" />
+      `;
+      defs.appendChild(radial);
+
+      const linearStem = document.createElementNS(ns, 'linearGradient');
+      linearStem.setAttribute('id', id + '-stem');
+      linearStem.setAttribute('x1', '0%');
+      linearStem.setAttribute('y1', '0%');
+      linearStem.setAttribute('x2', '0%');
+      linearStem.setAttribute('y2', '100%');
+      linearStem.innerHTML = `
+        <stop offset="0%" stop-color="${colLight}" />
+        <stop offset="60%" stop-color="${col}" />
+        <stop offset="100%" stop-color="${colDark}" />
+      `;
+      defs.appendChild(linearStem);
+
+      const linearBase = document.createElementNS(ns, 'linearGradient');
+      linearBase.setAttribute('id', id + '-base');
+      linearBase.setAttribute('x1', '0%');
+      linearBase.setAttribute('y1', '0%');
+      linearBase.setAttribute('x2', '0%');
+      linearBase.setAttribute('y2', '100%');
+      linearBase.innerHTML = `
+        <stop offset="0%" stop-color="${colLight}" />
+        <stop offset="50%" stop-color="${colMid}" />
+        <stop offset="100%" stop-color="${colDark}" />
+      `;
+      defs.appendChild(linearBase);
+
+      // Filters
+      const filter = document.createElementNS(ns, 'filter');
+      filter.setAttribute('id', id + '-shadow');
+      filter.setAttribute('x', '-50%');
+      filter.setAttribute('y', '-50%');
+      filter.setAttribute('width', '200%');
+      filter.setAttribute('height', '200%');
+      filter.innerHTML = `
+        <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="rgba(0,0,0,0.35)" />
+      `;
+      defs.appendChild(filter);
+
+      svg.appendChild(defs);
+
+      // Ground soft shadow (on transparent export it won't be baked unless drawn; we draw a subtle one)
+      const ground = document.createElementNS(ns, 'ellipse');
+      ground.setAttribute('cx', '64');
+      ground.setAttribute('cy', '140');
+      ground.setAttribute('rx', '34');
+      ground.setAttribute('ry', '8');
+      ground.setAttribute('fill', 'rgba(0,0,0,0.20)');
+      ground.setAttribute('style', 'filter: blur(0.5px)');
+      svg.appendChild(ground);
+
+      // Base plinth (conical look)
+      const base = document.createElementNS(ns, 'path');
+      base.setAttribute('d', 'M28 126 Q64 150 100 126 L100 112 Q64 128 28 112 Z');
+      base.setAttribute('fill', `url(#${id}-base)`);
+      base.setAttribute('stroke', 'rgba(0,0,0,0.25)');
+      base.setAttribute('stroke-width', '1');
+      base.setAttribute('filter', `url(#${id}-shadow)`);
+      svg.appendChild(base);
+
+      // Base top ellipse
+      const baseTop = document.createElementNS(ns, 'ellipse');
+      baseTop.setAttribute('cx', '64');
+      baseTop.setAttribute('cy', '112');
+      baseTop.setAttribute('rx', '36');
+      baseTop.setAttribute('ry', '10');
+      baseTop.setAttribute('fill', colLight);
+      baseTop.setAttribute('opacity', '0.9');
+      svg.appendChild(baseTop);
+
+      // Stem (slightly curved sides)
+      const stem = document.createElementNS(ns, 'path');
+      stem.setAttribute('d', 'M48 112 C46 92, 50 76, 64 72 C78 76, 82 92, 80 112 Z');
+      stem.setAttribute('fill', `url(#${id}-stem)`);
+      stem.setAttribute('stroke', 'rgba(0,0,0,0.25)');
+      stem.setAttribute('stroke-width', '1');
+      stem.setAttribute('filter', `url(#${id}-shadow)`);
+      svg.appendChild(stem);
+
+      // Head (rounded top)
+      const head = document.createElementNS(ns, 'circle');
+      head.setAttribute('cx', '64');
+      head.setAttribute('cy', '56');
+      head.setAttribute('r', '22');
+      head.setAttribute('fill', `url(#${id}-head)`);
+      head.setAttribute('stroke', 'rgba(0,0,0,0.25)');
+      head.setAttribute('stroke-width', '1');
+      head.setAttribute('filter', `url(#${id}-shadow)`);
+      svg.appendChild(head);
+
+      // Specular highlights
+      const gloss1 = document.createElementNS(ns, 'ellipse');
+      gloss1.setAttribute('cx', '54');
+      gloss1.setAttribute('cy', '48');
+      gloss1.setAttribute('rx', '8');
+      gloss1.setAttribute('ry', '5');
+      gloss1.setAttribute('fill', 'rgba(255,255,255,0.85)');
+      svg.appendChild(gloss1);
+
+      const gloss2 = document.createElementNS(ns, 'path');
+      gloss2.setAttribute('d', 'M54 78 C60 74, 68 74, 74 78 C70 80, 62 80, 54 78 Z');
+      gloss2.setAttribute('fill', 'rgba(255,255,255,0.25)');
+      svg.appendChild(gloss2);
+
+      const rimHighlight = document.createElementNS(ns, 'ellipse');
+      rimHighlight.setAttribute('cx', '64');
+      rimHighlight.setAttribute('cy', '112');
+      rimHighlight.setAttribute('rx', '24');
+      rimHighlight.setAttribute('ry', '5');
+      rimHighlight.setAttribute('fill', 'rgba(255,255,255,0.35)');
+      svg.appendChild(rimHighlight);
+    }
+
+    function downloadPNG(svgId, filename, size) {
+      const svg = document.getElementById(svgId);
+      const clone = svg.cloneNode(true);
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(clone);
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = Math.round(size * (160/128));
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Transparent background
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        canvas.toBlob(function(blob) {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        }, 'image/png');
+      };
+      img.src = url;
+    }
+
+    // Initialize tokens
+    buildPawn(document.getElementById('token-white'), '#FFFFFF');
+    buildPawn(document.getElementById('token-red'), '#FF0000');
+    buildPawn(document.getElementById('token-green'), '#008000');
+    buildPawn(document.getElementById('token-yellow'), '#FFD700');
+    buildPawn(document.getElementById('token-blue'), '#0000FF');
+  </script>
+</body>
+</html>
+

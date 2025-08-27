@@ -13,8 +13,7 @@ public class GameStateDTO {
   private List<DiceDTO> currentDiceRolls;
   private List<PlayerDTO> winners;
   private Map<Integer, List<TokenDTO>> playerPositions;
-
-  // You can add more fields as needed, e.g., playerPositions summary
+  private LastDiceRollDTO lastDiceRoll; // New field for last dice roll
 
   // Getters and setters
   public String getGameId() {
@@ -87,5 +86,13 @@ public class GameStateDTO {
 
   public void setPlayerPositions(Map<Integer, List<TokenDTO>> playerPositions) {
     this.playerPositions = playerPositions;
+  }
+
+  public LastDiceRollDTO getLastDiceRoll() {
+    return lastDiceRoll;
+  }
+
+  public void setLastDiceRoll(LastDiceRollDTO lastDiceRoll) {
+    this.lastDiceRoll = lastDiceRoll;
   }
 }

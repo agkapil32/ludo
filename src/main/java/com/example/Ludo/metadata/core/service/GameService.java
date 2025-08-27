@@ -8,6 +8,7 @@ import com.example.Ludo.metadata.core.dto.GameStateMapper;
 import com.example.Ludo.metadata.core.enums.Color;
 import com.example.Ludo.metadata.core.model.Dice;
 import com.example.Ludo.metadata.core.model.GameState;
+import com.example.Ludo.metadata.core.model.LastDiceRoll;
 import com.example.Ludo.metadata.core.model.Player;
 import com.example.Ludo.metadata.core.model.Token;
 import com.example.Ludo.metadata.exception.GameNotFoundException;
@@ -52,7 +53,9 @@ public class GameService {
         new CopyOnWriteArrayList<>(),
         new CopyOnWriteArrayList<>(),
         new ConcurrentHashMap<>(),
-        new CopyOnWriteArrayList<>());
+        new CopyOnWriteArrayList<>(),
+        null // lastDiceRoll
+    );
 
     games.put(gameId, newGame);
     System.out.println("💾 [GameService] Game stored - ID: " + gameId + ", Total games: " + games.size());
@@ -164,6 +167,14 @@ public class GameService {
     diceService.rollDice(game, playerIndex);
     Dice latestDice = game.getCurrentDiceRolls().get(game.getCurrentDiceRolls().size() - 1);
     System.out.println("🎯 [GameService] " + currentPlayerName + " rolled: " + latestDice.getMove());
+
+    // Record last dice roll for display (even if turn changes)
+    game.setLastDiceRoll(LastDiceRoll.builder()
+        .playerIndex(playerIndex)
+        .move(latestDice.getMove())
+        .timestamp(System.currentTimeMillis())
+        .rollId(game.getGameId() + "-" + playerIndex + "-" + System.currentTimeMillis())
+        .build());
 
     // ✅ ENHANCED: Better debugging and null safety for turn change logic
     List<Token> tokens = game.getPlayerPositions().get(playerIndex);
@@ -319,7 +330,9 @@ public class GameService {
             players,
             currentDiceRolls,
             playerPositions,
-            new ArrayList<>());
+            new ArrayList<>(),
+            null // lastDiceRoll
+        );
     games.put(gameId, gameState);
   }
 }

@@ -22,6 +22,8 @@ public class GameState {
   private Map<Integer, List<Token>> playerPositions =
       new ConcurrentHashMap<>(); // for each players 4 dices will be there
   private List<Player> winners = new CopyOnWriteArrayList<>();
+  // Store the most recent dice roll for display purposes
+  private LastDiceRoll lastDiceRoll;
 
   public boolean hasPlayerWon(int playerIndex) {
     List<Token> tokens = playerPositions.get(playerIndex);
