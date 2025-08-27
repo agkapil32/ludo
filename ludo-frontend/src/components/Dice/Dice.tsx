@@ -12,6 +12,8 @@ const SIZE_CLASSES = {
 } as const;
 const ANIMATION_SEQUENCE = ['?', 1, 3, 5, 2, 4, 6, 1, 4, 2, 5, 3] as const;
 const MAX_ROLLS = 3;
+const DWELL_MS = 800; // minimum time to keep final face visible
+const MIN_ROLL_MS = 800; // minimum rolling animation duration
 
 interface DiceAnimationState {
   isAnimating: boolean;
@@ -81,29 +83,29 @@ const Dice: React.FC = () => {
     lastProcessedRoll: null
   });
 
-  // Track the last roll ID to prevent duplicate state updates
+  // Refs for lifecycle control
   const lastRollIdRef = useRef<string | null>(null);
   const rollingIntervalRef = useRef<number | null>(null);
+  const safetyTimeoutRef = useRef<number | null>(null);
+  const dwellTimeoutRef = useRef<number | null>(null);
+  const lastFaceShownAtRef = useRef<number | null>(null);
+  const rollStartAtRef = useRef<number | null>(null);
+  const finalizeTimeoutRef = useRef<number | null>(null);
+  const gameStateRef = useRef(gameState);
+
+  useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
 
   // ✅ SIMPLIFIED: Use DTO data directly, minimal computation
   const diceData = useMemo(() => {
-    if (!gameState?.currentDiceRolls) {
-      return {
-        currentDiceRolls: [],
-        latestRoll: null as any,
-        hasRolls: false
-      };
-    }
-
-    const currentDiceRolls = gameState.currentDiceRolls;
-    const latestRoll = currentDiceRolls[currentDiceRolls.length - 1];
-
+    const rolls = gameState?.currentDiceRolls || [];
+    const latestRoll = rolls[rolls.length - 1];
     return {
-      currentDiceRolls,
+      currentDiceRolls: rolls,
       latestRoll,
-      hasRolls: currentDiceRolls.length > 0
+      hasRolls: rolls.length > 0,
+      lastDiceRoll: (gameState as any)?.lastDiceRoll || null
     };
-  }, [gameState?.currentDiceRolls]);
+  }, [gameState?.currentDiceRolls, (gameState as any)?.lastDiceRoll]);
 
   // ✅ HELPER: Check if current user's turn (simple DTO check)
   const isMyTurn = useMemo(() => {
@@ -113,7 +115,33 @@ const Dice: React.FC = () => {
       : false;
   }, [gameState]);
 
-  // ✅ SIMPLIFIED: When backend sends a NEW dice result, stop rolling and show final face from sprite
+  // Helper to finalize a roll and show the final face
+  const finalizeRoll = useCallback((rollValue: number, currentRollId: string) => {
+    if (rollingIntervalRef.current) {
+      window.clearInterval(rollingIntervalRef.current);
+      rollingIntervalRef.current = null;
+    }
+    if (safetyTimeoutRef.current) {
+      window.clearTimeout(safetyTimeoutRef.current);
+      safetyTimeoutRef.current = null;
+    }
+    if (dwellTimeoutRef.current) {
+      window.clearTimeout(dwellTimeoutRef.current);
+      dwellTimeoutRef.current = null;
+    }
+
+    lastFaceShownAtRef.current = Date.now();
+
+    setAnimationState(prev => ({
+      ...prev,
+      isAnimating: false,
+      currentFace: rollValue,
+      finalValue: rollValue,
+      lastProcessedRoll: currentRollId
+    }));
+  }, []);
+
+  // Stop rolling and show final value from DTO whenever a new dice result arrives, but honor MIN_ROLL_MS
   useEffect(() => {
     if (!diceData.latestRoll) return;
 
@@ -122,26 +150,125 @@ const Dice: React.FC = () => {
 
     if (currentRollId === lastRollIdRef.current) return;
 
-    // Mark processed
     lastRollIdRef.current = currentRollId;
 
-    // Stop any running interval animation
+    const now = Date.now();
+    const startedAt = rollStartAtRef.current ?? now;
+    const elapsed = now - startedAt;
+    const remainingRoll = Math.max(0, MIN_ROLL_MS - elapsed);
+
+    if (finalizeTimeoutRef.current) {
+      window.clearTimeout(finalizeTimeoutRef.current);
+      finalizeTimeoutRef.current = null;
+    }
+
+    if (remainingRoll > 0) {
+      finalizeTimeoutRef.current = window.setTimeout(() => {
+        finalizeRoll(rollValue, currentRollId);
+        finalizeTimeoutRef.current = null;
+      }, remainingRoll);
+    } else {
+      finalizeRoll(rollValue, currentRollId);
+    }
+  }, [diceData.latestRoll?.move, diceData.currentDiceRolls.length, gameState?.currentPlayerIndex, finalizeRoll]);
+
+  // Fallback: if backend cleared currentDiceRolls due to turn change but provided lastDiceRoll, use it to finalize
+  useEffect(() => {
+    if (diceData.latestRoll || !diceData.lastDiceRoll) return;
+
+    const { move, playerIndex, timestamp, rollId } = diceData.lastDiceRoll;
+    const currentRollId = `last-${move}-${playerIndex}-${timestamp ?? ''}-${rollId ?? ''}`;
+
+    if (currentRollId === lastRollIdRef.current) return;
+    lastRollIdRef.current = currentRollId;
+
+    const now = Date.now();
+    const startedAt = rollStartAtRef.current ?? now;
+    const elapsed = now - startedAt;
+    const remainingRoll = Math.max(0, MIN_ROLL_MS - elapsed);
+
+    if (finalizeTimeoutRef.current) {
+      window.clearTimeout(finalizeTimeoutRef.current);
+      finalizeTimeoutRef.current = null;
+    }
+
+    if (remainingRoll > 0) {
+      finalizeTimeoutRef.current = window.setTimeout(() => {
+        finalizeRoll(move, currentRollId);
+        finalizeTimeoutRef.current = null;
+      }, remainingRoll);
+    } else {
+      finalizeRoll(move, currentRollId);
+    }
+  }, [diceData.latestRoll, diceData.lastDiceRoll, finalizeRoll]);
+
+  // Helper to apply the UI reset for a new turn
+  const applyTurnReset = useCallback(() => {
     if (rollingIntervalRef.current) {
       window.clearInterval(rollingIntervalRef.current);
       rollingIntervalRef.current = null;
     }
+    if (safetyTimeoutRef.current) {
+      window.clearTimeout(safetyTimeoutRef.current);
+      safetyTimeoutRef.current = null;
+    }
+    if (dwellTimeoutRef.current) {
+      window.clearTimeout(dwellTimeoutRef.current);
+      dwellTimeoutRef.current = null;
+    }
+    if (finalizeTimeoutRef.current) {
+      window.clearTimeout(finalizeTimeoutRef.current);
+      finalizeTimeoutRef.current = null;
+    }
 
-    // Show final value immediately using sprite frame
-    setAnimationState(prev => ({
-      ...prev,
+    lastRollIdRef.current = null;
+    lastFaceShownAtRef.current = null;
+    rollStartAtRef.current = null;
+
+    // Read latest dice for current player safely
+    const gs = gameStateRef.current;
+    const rolls = gs?.currentDiceRolls ?? [];
+    const nextFace: number | '?' = rolls.length ? rolls[rolls.length - 1].move : '?';
+
+    setAnimationState({
       isAnimating: false,
-      currentFace: rollValue,
-      finalValue: rollValue,
-      lastProcessedRoll: currentRollId
-    }));
-  }, [diceData.latestRoll?.move, diceData.currentDiceRolls.length, gameState?.currentPlayerIndex]);
+      currentFace: nextFace,
+      finalValue: typeof nextFace === 'number' ? nextFace : null,
+      lastProcessedRoll: null
+    });
+  }, []);
 
-  // ✅ SIMPLIFIED: Dice roll handler - use CSS rolling animation + random face shuffle while waiting
+  // Stop animation and reset markers when the turn changes, respecting both MIN_ROLL_MS and DWELL_MS
+  useEffect(() => {
+    const now = Date.now();
+
+    // If still rolling or finalization is pending, wait for rolling min duration + dwell
+    if (animationState.isAnimating || finalizeTimeoutRef.current) {
+      const startedAt = rollStartAtRef.current ?? now;
+      const remainingRoll = Math.max(0, MIN_ROLL_MS - (now - startedAt));
+      if (dwellTimeoutRef.current) window.clearTimeout(dwellTimeoutRef.current);
+      dwellTimeoutRef.current = window.setTimeout(() => {
+        applyTurnReset();
+      }, remainingRoll + DWELL_MS);
+      return;
+    }
+
+    // Otherwise, if we already showed a final face, honor remaining dwell
+    const lastShown = lastFaceShownAtRef.current;
+    const remainingDwell = lastShown ? Math.max(0, DWELL_MS - (now - lastShown)) : 0;
+
+    if (remainingDwell > 0) {
+      if (dwellTimeoutRef.current) window.clearTimeout(dwellTimeoutRef.current);
+      dwellTimeoutRef.current = window.setTimeout(() => {
+        applyTurnReset();
+      }, remainingDwell);
+    } else {
+      applyTurnReset();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameState?.currentPlayerIndex]);
+
+  // Dice roll handler
   const handleRollDice = useCallback(async () => {
     if (!isMyTurn) {
       alert('❌ It\'s not your turn! Wait for your turn to roll the dice.');
@@ -149,24 +276,60 @@ const Dice: React.FC = () => {
     }
 
     try {
-      // Start rolling animation (CSS) and randomize face for visual feedback
       setAnimationState(prev => ({ ...prev, isAnimating: true, currentFace: '?' }));
 
-      // Randomize sprite faces while waiting for API (purely visual)
+      // Cancel any pending dwell/finalize from a previous roll
+      if (dwellTimeoutRef.current) {
+        window.clearTimeout(dwellTimeoutRef.current);
+        dwellTimeoutRef.current = null;
+      }
+      if (finalizeTimeoutRef.current) {
+        window.clearTimeout(finalizeTimeoutRef.current);
+        finalizeTimeoutRef.current = null;
+      }
+
+      rollStartAtRef.current = Date.now();
+
+      // Visual shuffle while waiting for API
+      if (rollingIntervalRef.current) {
+        window.clearInterval(rollingIntervalRef.current);
+      }
       rollingIntervalRef.current = window.setInterval(() => {
         const next = ANIMATION_SEQUENCE[Math.floor(Math.random() * ANIMATION_SEQUENCE.length)];
         setAnimationState(prev => ({ ...prev, currentFace: next }));
       }, 150);
 
-      // Call the backend API
-      await rollDice();
+      // Safety timeout: never let animation run forever
+      if (safetyTimeoutRef.current) {
+        window.clearTimeout(safetyTimeoutRef.current);
+      }
+      safetyTimeoutRef.current = window.setTimeout(() => {
+        if (rollingIntervalRef.current) {
+          window.clearInterval(rollingIntervalRef.current);
+          rollingIntervalRef.current = null;
+        }
+        setAnimationState(prev => ({ ...prev, isAnimating: false }));
+      }, 7000);
 
-      // The effect above will stop animation and set the final face when gameState updates
+      await rollDice();
+      // Effect will finalize when gameState updates
     } catch (error) {
       console.error('Failed to roll dice:', error);
       if (rollingIntervalRef.current) {
         window.clearInterval(rollingIntervalRef.current);
         rollingIntervalRef.current = null;
+      }
+      if (safetyTimeoutRef.current) {
+        window.clearTimeout(safetyTimeoutRef.current);
+        safetyTimeoutRef.current = null;
+      }
+      if (dwellTimeoutRef.current) {
+        window.clearTimeout(dwellTimeoutRef.current);
+        dwellTimeoutRef.current = null;
+      }
+      if (finalizeTimeoutRef.current) {
+        window.clearTimeout(finalizeTimeoutRef.current);
+        finalizeTimeoutRef.current = null;
       }
       setAnimationState(prev => ({ ...prev, isAnimating: false, currentFace: '?', finalValue: null }));
       const errorMessage = error instanceof Error ? error.message : 'Failed to roll dice';
@@ -179,6 +342,15 @@ const Dice: React.FC = () => {
     return () => {
       if (rollingIntervalRef.current) {
         window.clearInterval(rollingIntervalRef.current);
+      }
+      if (safetyTimeoutRef.current) {
+        window.clearTimeout(safetyTimeoutRef.current);
+      }
+      if (dwellTimeoutRef.current) {
+        window.clearTimeout(dwellTimeoutRef.current);
+      }
+      if (finalizeTimeoutRef.current) {
+        window.clearTimeout(finalizeTimeoutRef.current);
       }
     };
   }, []);
@@ -271,12 +443,13 @@ const Dice: React.FC = () => {
           onClick={handleRollDice}
           disabled={!uiState.canRoll}
           className={uiState.buttonClassName}
+          aria-label="Roll dice"
         >
           {uiState.buttonText}
         </button>
 
         {/* Status Display */}
-        <div className={uiState.statusClassName}>
+        <div className={uiState.statusClassName} role="status" aria-live="polite">
           {uiState.statusMessage}
         </div>
 

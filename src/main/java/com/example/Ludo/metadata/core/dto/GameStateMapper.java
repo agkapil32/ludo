@@ -3,6 +3,7 @@ package com.example.Ludo.metadata.core.dto;
 import com.example.Ludo.metadata.core.model.Dice;
 import com.example.Ludo.metadata.core.model.GameState;
 import com.example.Ludo.metadata.core.model.Player;
+import com.example.Ludo.metadata.core.model.LastDiceRoll;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +63,18 @@ public class GameStateMapper {
                                 })
                             .collect(Collectors.toList())));
     dto.setPlayerPositions(playerPositionsDTO);
+
+    // Map lastDiceRoll (display-only)
+    LastDiceRoll last = game.getLastDiceRoll();
+    if (last != null) {
+      LastDiceRollDTO ldr = new LastDiceRollDTO();
+      ldr.setPlayerIndex(last.getPlayerIndex());
+      ldr.setMove(last.getMove());
+      ldr.setTimestamp(last.getTimestamp());
+      ldr.setRollId(last.getRollId());
+      dto.setLastDiceRoll(ldr);
+    }
+
     return dto;
   }
 }

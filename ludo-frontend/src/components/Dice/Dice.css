@@ -234,15 +234,16 @@
   }
 }
 
-/* Enhanced Dice Face Styling */
+/* Enhanced Dice Face Styling - align with preview */
 .dice-face-image {
   position: relative;
   width: 80px;
   height: 80px;
-  border-radius: 12px;
-  transition: all 0.3s ease;
-  margin: 0 auto;
+  border-radius: 8px;
   overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border: 2px solid #333;
+  background: #fff;
 }
 
 .dice-face-small {
@@ -261,52 +262,19 @@
 }
 
 .dice-face-image.rolling {
-  animation: enhanced-roll 0.15s ease-in-out infinite;
+  animation: dice-roll 0.6s ease-in-out infinite;
+}
+
+@keyframes dice-roll {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(90deg) scale(1.1); }
+  50% { transform: rotate(180deg) scale(1.2); }
+  75% { transform: rotate(270deg) scale(1.1); }
 }
 
 .dice-face-image.six-face {
-  animation: glow-six 1s ease-in-out;
-}
-
-.dice-face-image.special-value {
-  animation: special-glow 1.5s ease-in-out infinite;
-}
-
-.dice-face-image.question-face {
-  animation: question-pulse 2s ease-in-out infinite;
-}
-
-@keyframes enhanced-roll {
-  0% { transform: rotate(0deg) scale(1); }
-  25% { transform: rotate(90deg) scale(0.95); }
-  50% { transform: rotate(180deg) scale(1.05); }
-  75% { transform: rotate(270deg) scale(0.95); }
-  100% { transform: rotate(360deg) scale(1); }
-}
-
-@keyframes glow-six {
-  0%, 100% {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border: 2px solid transparent;
-  }
-  50% {
-    box-shadow: 0 6px 20px rgba(211, 47, 47, 0.6);
-    border: 2px solid #d32f2f;
-  }
-}
-
-@keyframes special-glow {
-  0%, 100% {
-    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
-  }
-  50% {
-    box-shadow: 0 6px 16px rgba(76, 175, 80, 0.6);
-  }
-}
-
-@keyframes question-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  border-color: #ff6b6b;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
 }
 
 /* Enhanced Dice Sprite */
@@ -314,6 +282,9 @@
   width: 100%;
   height: 100%;
   transition: all 0.3s ease;
+  background-repeat: no-repeat;
+  background-size: 700% 100%;
+  image-rendering: crisp-edges;
 }
 
 /* Enhanced Overlays */
@@ -322,16 +293,11 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 2em;
-  font-weight: bold;
-  color: #666;
+  font-size: 24px;
+  color: #333;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
   pointer-events: none;
-  animation: question-bounce 1s ease-in-out infinite;
-}
-
-@keyframes question-bounce {
-  0%, 100% { transform: translate(-50%, -50%) scale(1); }
-  50% { transform: translate(-50%, -50%) scale(1.1); }
+  animation: none;
 }
 
 .dice-dots-overlay {
@@ -342,8 +308,8 @@
   bottom: 0;
   pointer-events: none;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
   padding: 8px;
   gap: 2px;
 }
@@ -355,52 +321,42 @@
   border-radius: 50%;
   opacity: 0;
   transition: opacity 0.3s ease;
+  margin: auto;
 }
 
-/* Pattern 1 - Single dot in center */
-.dice-pattern-1 .dice-dot:nth-child(5) {
-  opacity: 1;
-}
+/* FIX: Correct dot patterns to match standard pip layout (preview) */
+/* 1 - center */
+.dice-pattern-1 .dice-dot:nth-child(5) { opacity: 1; }
 
-/* Pattern 2 - Two dots diagonal */
-.dice-pattern-2 .dice-dot:nth-child(3),
-.dice-pattern-2 .dice-dot:nth-child(7) {
-  opacity: 1;
-}
+/* 2 - top-left & bottom-right */
+.dice-pattern-2 .dice-dot:nth-child(1),
+.dice-pattern-2 .dice-dot:nth-child(9) { opacity: 1; }
 
-/* Pattern 3 - Three dots diagonal */
-.dice-pattern-3 .dice-dot:nth-child(3),
+/* 3 - top-left, center, bottom-right */
+.dice-pattern-3 .dice-dot:nth-child(1),
 .dice-pattern-3 .dice-dot:nth-child(5),
-.dice-pattern-3 .dice-dot:nth-child(7) {
-  opacity: 1;
-}
+.dice-pattern-3 .dice-dot:nth-child(9) { opacity: 1; }
 
-/* Pattern 4 - Four corners */
+/* 4 - corners */
 .dice-pattern-4 .dice-dot:nth-child(1),
 .dice-pattern-4 .dice-dot:nth-child(3),
 .dice-pattern-4 .dice-dot:nth-child(7),
-.dice-pattern-4 .dice-dot:nth-child(9) {
-  opacity: 1;
-}
+.dice-pattern-4 .dice-dot:nth-child(9) { opacity: 1; }
 
-/* Pattern 5 - Four corners + center */
+/* 5 - corners + center */
 .dice-pattern-5 .dice-dot:nth-child(1),
 .dice-pattern-5 .dice-dot:nth-child(3),
 .dice-pattern-5 .dice-dot:nth-child(5),
 .dice-pattern-5 .dice-dot:nth-child(7),
-.dice-pattern-5 .dice-dot:nth-child(9) {
-  opacity: 1;
-}
+.dice-pattern-5 .dice-dot:nth-child(9) { opacity: 1; }
 
-/* Pattern 6 - All six dots */
+/* 6 - three left and three right (no center) */
 .dice-pattern-6 .dice-dot:nth-child(1),
-.dice-pattern-6 .dice-dot:nth-child(2),
 .dice-pattern-6 .dice-dot:nth-child(3),
+.dice-pattern-6 .dice-dot:nth-child(4),
+.dice-pattern-6 .dice-dot:nth-child(6),
 .dice-pattern-6 .dice-dot:nth-child(7),
-.dice-pattern-6 .dice-dot:nth-child(8),
-.dice-pattern-6 .dice-dot:nth-child(9) {
-  opacity: 1;
-}
+.dice-pattern-6 .dice-dot:nth-child(9) { opacity: 1; }
 
 /* Enhanced main dice display */
 .dice-main-section {

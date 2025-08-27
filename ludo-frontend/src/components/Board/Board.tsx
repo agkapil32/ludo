@@ -3,6 +3,10 @@ import { useGameContext } from '../../context/GameContext';
 import BoardSVG from './BoardSVG';
 import Token from './Token';
 import './Board.css';
+import { getTokenPixelPosition } from './boardLayout';
+
+// Debug flag for optional UI logs
+const DEBUG_UI = (import.meta as any)?.env?.VITE_DEBUG_UI === 'true';
 
 const Board: React.FC = () => {
   const { gameState, moveToken } = useGameContext();
@@ -47,7 +51,7 @@ const Board: React.FC = () => {
     try {
       const isCurrentPlayerTurn = gameState.currentPlayerIndex === playerIndex;
       const hasValidDiceRolls = gameState.currentDiceRolls && gameState.currentDiceRolls.some(dice => !dice.isUsed);
-      const tokenCanMove = token.currentPosition >= 0 && !token.isFinished;
+      const tokenCanMove = token.position >= 0 && !token.finished;
 
       return isCurrentPlayerTurn && hasValidDiceRolls && tokenCanMove;
     } catch (error) {
@@ -56,9 +60,33 @@ const Board: React.FC = () => {
     }
   };
 
+  // Precompute overlapping tokens by pixel position to provide stack indices
+  const overlapCounts: Map<string, number> = new Map();
+  const overlapIndices: Map<string, number> = new Map();
+
+  try {
+    // First pass: count how many tokens occupy the same pixel position
+    gameState.players.forEach((player, playerIdx) => {
+      const mappedPlayerIndex = getPlayerTokenIndex(player.color);
+      const playerTokens = gameState.playerPositions && gameState.playerPositions[playerIdx]
+        ? gameState.playerPositions[playerIdx]
+        : Array.from({ length: 4 }, () => ({ position: -1, finished: false }));
+
+      playerTokens.forEach((token: any, tokenIdx: number) => {
+        const { x, y } = getTokenPixelPosition(mappedPlayerIndex, tokenIdx, token.position);
+        const key = `${Math.round(x)}:${Math.round(y)}`;
+        overlapCounts.set(key, (overlapCounts.get(key) || 0) + 1);
+      });
+    });
+  } catch (e) {
+    console.warn('Failed to precompute token overlaps:', e);
+  }
+
   // Handle token click for movement
   const handleTokenClick = async (playerIndex: number, tokenIndex: number, token: any) => {
-    console.log(`🎯 Token clicked: Player ${playerIndex}, Token ${tokenIndex}, Position: ${token.currentPosition}`);
+    if (DEBUG_UI) {
+      console.debug(`Token click: p${playerIndex} #${tokenIndex} pos=${token.position}`);
+    }
 
     try {
       if (!canMoveToken(playerIndex, tokenIndex, token)) {
@@ -86,33 +114,50 @@ const Board: React.FC = () => {
 
           {/* Render player tokens */}
           {gameState.players && gameState.players.map((player, playerIndex) => {
-            console.log(`Player ${playerIndex + 1} (${player.color}):`, player);
+            if (DEBUG_UI) {
+              console.debug(`Player ${playerIndex + 1} (${player.color})`);
+            }
 
             const playerTokens = gameState.playerPositions && gameState.playerPositions[playerIndex]
               ? gameState.playerPositions[playerIndex]
-              : Array.from({length: 4}, () => ({ currentPosition: -1, isFinished: false }));
+              : Array.from({length: 4}, () => ({ position: -1, finished: false }));
 
-            console.log(`Player ${playerIndex + 1} tokens:`, playerTokens);
+            if (DEBUG_UI) {
+              console.debug(`p${playerIndex + 1} tokens:`, playerTokens);
+            }
+
+            const mappedPlayerIndex = getPlayerTokenIndex(player.color);
 
             return playerTokens.map((token, tokenIndex) => {
               try {
-                console.log(`Rendering token for Player ${playerIndex + 1} (${player.color}), Token ${tokenIndex + 1}, Position: ${token.currentPosition}`);
+                if (DEBUG_UI) {
+                  console.debug(`Render token p${playerIndex + 1} t${tokenIndex + 1} pos=${token.position}`);
+                }
 
                 // Determine if token should have special effects
-                const isCurrentPlayerTurn = gameState.currentPlayerIndex === playerIndex;
                 const isMovableToken = canMoveToken(playerIndex, tokenIndex, token);
+
+                // Compute stack info using precomputed counts and running indices per key
+                const { x, y } = getTokenPixelPosition(mappedPlayerIndex, tokenIndex, token.position);
+                const key = `${Math.round(x)}:${Math.round(y)}`;
+                const stackCount = overlapCounts.get(key) || 1;
+                const currentIdx = overlapIndices.get(key) || 0;
+                overlapIndices.set(key, currentIdx + 1);
 
                 return (
                   <Token
                     key={`player-${playerIndex}-token-${tokenIndex}`}
-                    color={player.color} // Use actual player color from game state
-                    position={token.currentPosition} // Use currentPosition from backend
+                    color={player.color}
+                    position={token.position}
                     tokenIndex={tokenIndex}
-                    playerIndex={getPlayerTokenIndex(player.color)} // Map color to token component index
-                    isFinished={token.isFinished}
-                    isGlowing={isCurrentPlayerTurn || token.isFinished}
+                    playerIndex={mappedPlayerIndex}
+                    isFinished={token.finished}
+                    isGlowing={gameState.currentPlayerIndex === playerIndex || token.finished}
                     isAnimated={isMovableToken}
                     onClick={isMovableToken ? () => handleTokenClick(playerIndex, tokenIndex, token) : undefined}
+                    stackIndex={currentIdx}
+                    stackCount={stackCount}
+                    isDimmed={!isMovableToken}
                   />
                 );
               } catch (tokenError) {

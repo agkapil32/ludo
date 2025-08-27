@@ -16,13 +16,22 @@ export interface PlayerDTO {
 }
 
 export interface TokenDTO {
-  tokenIndex: number;        // Matches backend
-  currentPosition: number;   // Matches backend
-  color: string;            // Matches backend
-  // Computed properties (derived from backend data)
-  isOpen?: boolean;         // Computed: currentPosition !== -1
-  isFinished?: boolean;     // Computed: backend calculates this
-  globalPosition?: number;  // Computed: backend calculates this
+  position: number;   // Matches backend TokenDTO.position
+  finished: boolean;  // Matches backend TokenDTO.finished
+  // Optional aliases for backward compatibility (do not rely on these)
+  currentPosition?: number;
+  isFinished?: boolean;
+  tokenIndex?: number;
+  color?: string;
+  isOpen?: boolean;
+  globalPosition?: number;
+}
+
+export interface LastDiceRollDTO {
+  playerIndex: number;
+  move: number;
+  timestamp?: number;
+  rollId?: string;
 }
 
 export interface GameStateDTO {
@@ -36,6 +45,8 @@ export interface GameStateDTO {
   winners: PlayerDTO[];
   playerPositions: Record<number, TokenDTO[]>;
   gameStatus?: string;  // Add missing field from backend
+  // Display-only last dice roll (does not affect move logic)
+  lastDiceRoll?: LastDiceRollDTO;
 }
 
 // ✅ REMOVED: No longer needed - backend handles all logic
