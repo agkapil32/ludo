@@ -30,9 +30,9 @@ const RedToken: React.FC<RedTokenProps> = ({
         {/* Main gradient for the token */}
         <radialGradient id={`${tokenId}-main`} cx="0.3" cy="0.3" r="0.8">
           <stop offset="0%" stopColor="#ff6b6b" />
-          <stop offset="40%" stopColor="#FF0000" />
-          <stop offset="80%" stopColor="#cc0000" />
-          <stop offset="100%" stopColor="#990000" />
+          <stop offset="40%" stopColor="#EB1C24" />
+          <stop offset="80%" stopColor="#c01419" />
+          <stop offset="100%" stopColor="#990f14" />
         </radialGradient>
 
         {/* Glossy highlight gradient */}

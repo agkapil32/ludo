@@ -1,11 +1,12 @@
+/* Enhanced Board styles with token animations and visual feedback */
 .board-container {
-  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 20px;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  min-height: 100vh;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 .board-placeholder {
@@ -32,6 +33,18 @@
   background: #fff;
 }
 
+.game-board {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.game-board:hover {
+  transform: scale(1.02);
+}
+
+/* Board Dice Overlay */
 .board-dice-overlay {
   position: absolute;
   top: 50%;
@@ -85,7 +98,72 @@
   }
 }
 
-/* Enhanced Token styling */
+/* Loading and Error States */
+.board-loading,
+.board-error {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.board-loading p,
+.board-error p {
+  color: #6c757d;
+  font-size: 1.1rem;
+  margin: 10px 0;
+}
+
+.board-error h3 {
+  color: #dc3545;
+  margin-bottom: 16px;
+  font-size: 1.5rem;
+}
+
+.refresh-button {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 20px;
+}
+
+.refresh-button:hover {
+  background: #2980b9;
+  transform: translateY(-2px);
+}
+
+/* Enhanced Token Styles */
 .token {
   position: absolute;
   width: 32px;
@@ -156,9 +234,10 @@
   }
 }
 
-/* Token Styles */
+/* Enhanced Token Wrapper Styles */
 .token-wrapper {
-  transition: all 0.3s ease;
+  transition: all 0.2s ease-in-out;
+  will-change: transform, opacity;
 }
 
 .ludo-token {
@@ -183,38 +262,110 @@
   animation: finishedTokenCelebration 2s ease-in-out infinite;
 }
 
-/* Token Animations */
-@keyframes tokenPulse {
+/* Movable token effects - more stable */
+.token-wrapper.can-move {
+  cursor: pointer !important;
+  filter: brightness(1.1);
+}
+
+.token-wrapper.can-move:hover {
+  transform: scale(1.05);
+  filter: brightness(1.2) drop-shadow(0 0 8px rgba(76, 175, 80, 0.6));
+}
+
+/* Animation for tokens that are moving - smoother */
+.token-wrapper.moving {
+  z-index: 1000;
+  filter: brightness(1.2) drop-shadow(0 0 12px rgba(255, 255, 255, 0.8));
+  animation: move-bounce 0.8s ease-in-out;
+  transition: none; /* Disable transitions during movement */
+}
+
+.token-wrapper.animated {
+  animation: pulse-glow 2s infinite alternate;
+}
+
+/* Glowing effect for active tokens - more subtle */
+.token-wrapper.glowing {
+  filter: brightness(1.1) drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+}
+
+/* Dimmed tokens (not movable) - stable transition */
+.token-wrapper.dimmed {
+  opacity: 0.6;
+  filter: grayscale(0.3);
+  pointer-events: none;
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* Safe position indicator - less aggressive */
+.token-wrapper.safe-position {
+  filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.5));
+}
+
+/* Finished tokens */
+.token-wrapper.finished-token {
+  animation: victory-celebration 4s ease-in-out infinite;
+  z-index: 50;
+}
+
+/* Keyframe animations - smoother and less jarring */
+@keyframes pulse-glow {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.03); /* Reduced from 1.05 */
+    opacity: 0.95; /* Less opacity change */
+  }
+}
+
+@keyframes move-bounce {
   0% {
     transform: scale(1);
   }
+  30% {
+    transform: scale(1.15) translateY(-2px); /* Reduced bounce */
+  }
+  60% {
+    transform: scale(1.1) translateY(-1px);
+  }
   100% {
-    transform: scale(1.05);
+    transform: scale(1);
   }
 }
 
-@keyframes tokenGlow {
+@keyframes glow-pulse {
   0% {
-    filter: brightness(1) drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+    filter: brightness(1) drop-shadow(0 0 3px currentColor);
   }
   100% {
-    filter: brightness(1.3) drop-shadow(0 0 15px rgba(255, 255, 255, 0.8));
+    filter: brightness(1.2) drop-shadow(0 0 8px currentColor); /* Reduced intensity */
   }
 }
 
-@keyframes finishedTokenCelebration {
+@keyframes safe-shimmer {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.15) drop-shadow(0 0 6px gold); /* Reduced shimmer */
+  }
+}
+
+@keyframes victory-celebration {
   0%,
   100% {
     transform: scale(1) rotate(0deg);
-    filter: brightness(1.2) drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
   }
   25% {
-    transform: scale(1.1) rotate(5deg);
-    filter: brightness(1.4) drop-shadow(0 0 12px rgba(255, 215, 0, 0.8));
+    transform: scale(1.08) rotate(3deg); /* Reduced celebration */
   }
   75% {
-    transform: scale(1.1) rotate(-5deg);
-    filter: brightness(1.4) drop-shadow(0 0 12px rgba(255, 215, 0, 0.8));
+    transform: scale(1.08) rotate(-3deg);
   }
 }
 
@@ -236,46 +387,126 @@
   }
 }
 
-/* Color-specific token styles */
-.red-token.glowing {
-  filter: drop-shadow(0 0 10px rgba(220, 53, 69, 0.6));
+/* Smooth position transitions */
+.token-wrapper .token-body {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.blue-token.glowing {
-  filter: drop-shadow(0 0 10px rgba(13, 110, 253, 0.6));
+/* Hover effects for interactive tokens */
+.token-wrapper.can-move:hover .token-body {
+  transform: scale(1.1);
 }
 
-.green-token.glowing {
-  filter: drop-shadow(0 0 10px rgba(25, 135, 84, 0.6));
+/* Focus styles for accessibility */
+.token-wrapper:focus {
+  outline: 3px solid #3498db;
+  outline-offset: 3px;
+  border-radius: 50%;
 }
 
-.yellow-token.glowing {
-  filter: drop-shadow(0 0 10px rgba(255, 193, 7, 0.6));
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .board-container {
+    padding: 10px;
+  }
+
+  .game-board {
+    width: 100%;
+    height: auto;
+    max-width: 90vw;
+    max-height: 90vw;
+  }
+
+  .token-wrapper {
+    cursor: pointer;
+  }
+
+  .token-wrapper.can-move:hover {
+    transform: scale(1.2);
+  }
 }
 
-/* Board Error and Loading States */
-.board-loading,
-.board-error {
+@media (max-width: 480px) {
+  .game-board {
+    max-width: 350px;
+  }
+
+  .token {
+    transform: scale(0.8);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .token-wrapper {
+    stroke-width: 2px;
+  }
+
+  .token-wrapper.can-move {
+    outline: 2px solid currentColor;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .token-wrapper,
+  .token-wrapper * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  .board-container {
+    background: white;
+    box-shadow: none;
+  }
+
+  .token-wrapper {
+    animation: none;
+  }
+}
+
+/* Board Container Styles */
+.board-container {
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 400px;
-  text-align: center;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 12px;
-  padding: 40px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
-.board-loading .loading-spinner {
-  width: 50px;
-  height: 50px;
+.game-board {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.game-board:hover {
+  transform: scale(1.02);
+}
+
+/* Loading States */
+.board-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+  color: #666;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #007bff;
+  border-top: 4px solid #3498db;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 @keyframes spin {
@@ -287,55 +518,168 @@
   }
 }
 
-.board-loading p,
-.board-error p {
-  color: #6c757d;
-  font-size: 1.1rem;
-  margin: 10px 0;
-}
-
-.board-error h3 {
-  color: #dc3545;
-  margin-bottom: 16px;
-  font-size: 1.5rem;
+/* Error States */
+.board-error {
+  text-align: center;
+  padding: 40px;
+  color: #e74c3c;
 }
 
 .refresh-button {
-  background: #007bff;
+  background: #3498db;
   color: white;
   border: none;
-  padding: 12px 24px;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 5px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 20px;
+  font-size: 14px;
+  margin-top: 15px;
+  transition: background 0.2s ease;
 }
 
 .refresh-button:hover {
-  background: #0056b3;
-  transform: translateY(-2px);
+  background: #2980b9;
 }
 
-/* Ensure board container always has a visible background */
-.board-container {
-  background: rgba(255, 255, 255, 0.98) !important;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  min-height: 400px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+/* Token Animation Styles */
+.token {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
 }
 
-.ludo-token.dimmed {
+/* Smooth movement animation - no transition during programmatic animation */
+.token:not(.token-moving) {
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Token states */
+.token-clickable {
+  cursor: pointer;
+}
+
+.token-clickable:hover {
+  transform: scale(1.1);
+  filter: brightness(1.1);
+}
+
+.token-moving {
+  /* Disable CSS transitions during JavaScript animation */
+  transition: none !important;
+  z-index: 100;
+}
+
+.token-animated {
+  animation: pulse 2s infinite;
+}
+
+.token-glowing {
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+}
+
+.token-dimmed {
   opacity: 0.6;
-  filter: saturate(0.8);
+  filter: grayscale(0.3);
 }
 
-.ludo-token.dimmed:hover {
-  transform: none;
-  filter: saturate(0.8);
+.token-finished {
+  filter: drop-shadow(0 0 12px rgba(255, 215, 0, 1)) brightness(1.2);
+  animation: celebrate 3s infinite;
+}
+
+/* Token Color Specific Styles */
+.token-red {
+  filter: drop-shadow(0 2px 4px rgba(235, 28, 36, 0.3));
+}
+
+.token-green {
+  filter: drop-shadow(0 2px 4px rgba(22, 163, 74, 0.3));
+}
+
+.token-blue {
+  filter: drop-shadow(0 2px 4px rgba(37, 99, 235, 0.3));
+}
+
+.token-yellow {
+  filter: drop-shadow(0 2px 4px rgba(202, 138, 4, 0.3));
+}
+
+/* Animations */
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+@keyframes celebrate {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.1) rotate(5deg);
+  }
+  75% {
+    transform: scale(1.1) rotate(-5deg);
+  }
+}
+
+@keyframes moveGlow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 5px rgba(76, 175, 80, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 15px rgba(76, 175, 80, 0.8));
+  }
+}
+
+/* Safe position indicator */
+.token g circle[stroke="gold"] {
+  animation: safeGlow 2s infinite;
+}
+
+@keyframes safeGlow {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Movement indicator */
+.token g circle[stroke="#4CAF50"] {
+  animation: moveIndicator 1.5s infinite;
+}
+
+@keyframes moveIndicator {
+  0%,
+  100% {
+    opacity: 0.4;
+    stroke-width: 1;
+  }
+  50% {
+    opacity: 0.8;
+    stroke-width: 3;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .board-container {
+    padding: 10px;
+  }
+
+  .game-board {
+    width: 100%;
+    height: auto;
+    max-width: 500px;
+  }
 }

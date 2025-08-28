@@ -35,8 +35,8 @@ public class TokenService {
 
     // Opening token with 6
     if (!token.isOpen() && move == 6) {
-      token.setCurrentPosition(1);
-      System.out.println("🔓 [TokenService] Token opened - moved to position 1");
+      token.setCurrentPosition(0);
+      System.out.println("🔓 [TokenService] Token opened - moved to position 0");
       return token;
     }
 

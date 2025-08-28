@@ -79,24 +79,6 @@ const GameControls: React.FC = () => {
 
       <Dice />
 
-      {currentDiceRolls.length > 0 && consecutiveSixes < 3 && (
-        <div className="move-instructions">
-          <p>Available dice values this turn:</p>
-          <p className="dice-values">
-            {currentDiceRolls.map((roll, index) => (
-              <span key={index} className={`dice-value ${roll.move === 6 ? 'six-value' : ''}`}>
-                {roll.move}
-              </span>
-            ))}
-          </p>
-          <p className="move-note">
-            {currentDiceRolls.some(roll => roll.move === 6) && currentDiceRolls.length < 3
-              ? "⚠️ You have sixes - must roll again before moving!"
-              : "✅ Click on your tokens to move them using these values"}
-          </p>
-        </div>
-      )}
-
       {consecutiveSixes === 3 && (
         <div className="turn-skipped-warning">
           <p>⚠️ Three sixes in a row! Backend has automatically moved to the next player.</p>

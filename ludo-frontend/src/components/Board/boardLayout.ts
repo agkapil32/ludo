@@ -7,7 +7,7 @@ export const GRID_DIM = 15; // Dimension of the logical grid
 export const TOKEN_DIAMETER = 28;
 
 // Corrected path mapping (52 main track squares) as (row,col) in 15x15 grid.
-// Following proper Ludo board clockwise pattern starting from red exit
+// Following proper Ludo board clockwise pattern: RED → GREEN → BLUE → YELLOW
 export const PATH_CELLS: { r: number; c: number }[] = [
   // Red starting area and initial path (0-5)
   { r: 6, c: 1 }, { r: 6, c: 2 }, { r: 6, c: 3 }, { r: 6, c: 4 }, { r: 6, c: 5 },
@@ -43,7 +43,7 @@ export const PATH_CELLS: { r: number; c: number }[] = [
   { r: 8, c: 5 }, { r: 8, c: 4 }, { r: 8, c: 3 }, { r: 8, c: 2 }, { r: 8, c: 1 }, { r: 8, c: 0 }, { r: 7, c: 0 }
 ];
 
-// Player start indices (where each player begins their journey)
+// Player start indices - FIXED: Now RED, GREEN, BLUE, YELLOW order
 export const PLAYER_START_INDEX = [0, 13, 26, 39]; // Red, Green, Blue, Yellow
 
 // Safe cells (star positions) - corrected based on actual Ludo board layout
@@ -59,35 +59,35 @@ export const SAFE_GLOBAL_INDICES = new Set([
   48   // Yellow second safe square
 ]);
 
-// Home yard positions for 4 tokens per player (pixel coordinates) - corrected positioning
+// FIXED: Home yard positions - Swap BLUE and YELLOW to match RED, GREEN, BLUE, YELLOW order
 export const HOME_CLUSTERS: { x: number; y: number }[][] = [
-  // Red player home (top-left) - better spacing
+  // Red player home (top-left) - Index 0
   [
     { x: CELL_SIZE * 1.5, y: CELL_SIZE * 1.5 },
     { x: CELL_SIZE * 3.5, y: CELL_SIZE * 1.5 },
     { x: CELL_SIZE * 1.5, y: CELL_SIZE * 3.5 },
     { x: CELL_SIZE * 3.5, y: CELL_SIZE * 3.5 }
   ],
-  // Green player home (top-right)
+  // Green player home (top-right) - Index 1
   [
     { x: CELL_SIZE * 10.5, y: CELL_SIZE * 1.5 },
     { x: CELL_SIZE * 12.5, y: CELL_SIZE * 1.5 },
     { x: CELL_SIZE * 10.5, y: CELL_SIZE * 3.5 },
     { x: CELL_SIZE * 12.5, y: CELL_SIZE * 3.5 }
   ],
-  // Blue player home (bottom-right)
-  [
-    { x: CELL_SIZE * 10.5, y: CELL_SIZE * 10.5 },
-    { x: CELL_SIZE * 12.5, y: CELL_SIZE * 10.5 },
-    { x: CELL_SIZE * 10.5, y: CELL_SIZE * 12.5 },
-    { x: CELL_SIZE * 12.5, y: CELL_SIZE * 12.5 }
-  ],
-  // Yellow player home (bottom-left)
+  // Blue player home (bottom-left) - Index 2 (SWAPPED with Yellow)
   [
     { x: CELL_SIZE * 1.5, y: CELL_SIZE * 10.5 },
     { x: CELL_SIZE * 3.5, y: CELL_SIZE * 10.5 },
     { x: CELL_SIZE * 1.5, y: CELL_SIZE * 12.5 },
     { x: CELL_SIZE * 3.5, y: CELL_SIZE * 12.5 }
+  ],
+  // Yellow player home (bottom-right) - Index 3 (SWAPPED with Blue)
+  [
+    { x: CELL_SIZE * 10.5, y: CELL_SIZE * 10.5 },
+    { x: CELL_SIZE * 12.5, y: CELL_SIZE * 10.5 },
+    { x: CELL_SIZE * 10.5, y: CELL_SIZE * 12.5 },
+    { x: CELL_SIZE * 12.5, y: CELL_SIZE * 12.5 }
   ]
 ];
 

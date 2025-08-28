@@ -12,6 +12,7 @@ interface GameContextType {
   setGameState: (gameState: GameStateDTO) => void;
   setCurrentPlayerName: (name: string) => void;
   refreshGameState: () => Promise<void>;
+  forceRefresh: () => Promise<void>; // ADDED: Manual refresh function
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -53,14 +54,21 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children, gameId }) 
     refreshGameState();
   }, [refreshGameState]);
 
-  // Auto-refresh game state every 10 seconds
+  // Auto-refresh game state every 5 seconds (reduced from 10 for better sync)
   useEffect(() => {
     const interval = setInterval(() => {
+      console.log(`🔄 [Auto-refresh] Refreshing game state for ${currentPlayerName}`);
       refreshGameState();
-    }, 10000); // 10 seconds
+    }, 5000); // Reduced to 5 seconds for better synchronization
 
     return () => clearInterval(interval);
-  }, [refreshGameState]);
+  }, [refreshGameState, currentPlayerName]);
+
+  // ENHANCED: Add manual refresh function for debugging
+  const forceRefresh = useCallback(async () => {
+    console.log(`🔄 [Force-refresh] Manual refresh triggered by ${currentPlayerName}`);
+    await refreshGameState();
+  }, [refreshGameState, currentPlayerName]);
 
   // Listen for localStorage changes to update currentPlayerName
   useEffect(() => {
@@ -137,7 +145,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children, gameId }) 
       setCurrentPlayerName(name);
       localStorage.setItem('currentPlayerName', name);
     },
-    refreshGameState
+    refreshGameState,
+    forceRefresh  // ADDED: Expose manual refresh function
   };
 
   return (

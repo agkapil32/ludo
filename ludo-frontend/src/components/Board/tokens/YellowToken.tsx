@@ -29,10 +29,10 @@ const YellowToken: React.FC<YellowTokenProps> = ({
       <defs>
         {/* Main gradient for the token */}
         <radialGradient id={`${tokenId}-main`} cx="0.3" cy="0.3" r="0.8">
-          <stop offset="0%" stopColor="#ffe066" />
-          <stop offset="40%" stopColor="#FFD700" />
-          <stop offset="80%" stopColor="#ccaa00" />
-          <stop offset="100%" stopColor="#997700" />
+          <stop offset="0%" stopColor="#fff07a" />
+          <stop offset="40%" stopColor="#FFE013" />
+          <stop offset="80%" stopColor="#cbb40f" />
+          <stop offset="100%" stopColor="#8f820a" />
         </radialGradient>
 
         {/* Glossy highlight gradient */}
