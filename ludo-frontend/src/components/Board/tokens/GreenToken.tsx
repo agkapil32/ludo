@@ -29,10 +29,10 @@ const GreenToken: React.FC<GreenTokenProps> = ({
       <defs>
         {/* Main gradient for the token */}
         <radialGradient id={`${tokenId}-main`} cx="0.3" cy="0.3" r="0.8">
-          <stop offset="0%" stopColor="#33d17a" />
-          <stop offset="40%" stopColor="#00A550" />
-          <stop offset="80%" stopColor="#008540" />
-          <stop offset="100%" stopColor="#006530" />
+          <stop offset="0%" stopColor="#4fe392" />
+          <stop offset="40%" stopColor="#02A04B" />
+          <stop offset="80%" stopColor="#027a39" />
+          <stop offset="100%" stopColor="#015a2b" />
         </radialGradient>
 
         {/* Glossy highlight gradient */}

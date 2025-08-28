@@ -29,9 +29,9 @@ const BlueToken: React.FC<BlueTokenProps> = ({
       <defs>
         {/* Main gradient for the token */}
         <radialGradient id={`${tokenId}-main`} cx="0.3" cy="0.3" r="0.8">
-          <stop offset="0%" stopColor="#4d9aff" />
-          <stop offset="40%" stopColor="#0000FF" />
-          <stop offset="80%" stopColor="#0000cc" />
+          <stop offset="0%" stopColor="#6b85d8" />
+          <stop offset="40%" stopColor="#22409A" />
+          <stop offset="80%" stopColor="#1b337a" />
         </radialGradient>
 
         {/* Glossy highlight gradient */}

@@ -403,23 +403,21 @@
 
 /* Enhanced Dice Results Grid */
 .dice-results-grid {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
 }
 
 .dice-result-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
   padding: 12px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.8);
-  transition: all 0.3s ease;
   border: 2px solid transparent;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
 }
 
 .dice-result-item.available {
@@ -443,99 +441,282 @@
   box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
 }
 
-/* Usage Status Indicators */
-.usage-status {
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 4px 8px;
-  border-radius: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.usage-status.available {
-  background: rgba(76, 175, 80, 0.2);
-  color: #2e7d32;
-  animation: pulse-available 2s ease-in-out infinite;
-}
-
-.usage-status.used {
-  background: rgba(158, 158, 158, 0.2);
-  color: #757575;
-}
-
-@keyframes pulse-available {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-/* Six Bonus Indicator */
-.six-bonus {
-  font-size: 0.7rem;
-  color: #ff6f00;
-  font-weight: bold;
-  background: rgba(255, 111, 0, 0.1);
-  padding: 2px 6px;
-  border-radius: 8px;
-  animation: bonus-glow 1.5s ease-in-out infinite;
-}
-
-@keyframes bonus-glow {
-  0%, 100% {
-    background: rgba(255, 111, 0, 0.1);
-    transform: scale(1);
-  }
-  50% {
-    background: rgba(255, 111, 0, 0.2);
-    transform: scale(1.05);
-  }
-}
-
-/* Can Roll Again Indicator */
-.can-roll-again {
-  color: #ff6f00;
-  font-weight: bold;
-  animation: can-roll-pulse 1s ease-in-out infinite;
-}
-
-@keyframes can-roll-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-/* Enhanced Roll Button States for Bonus Rolls */
-.roll-button-enhanced.bonus-roll {
-  background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
-  animation: bonus-pulse 1s ease-in-out infinite;
+/* ENHANCED: Sequential dice usage visualization */
+.dice-progress-bar {
   position: relative;
+  width: 100%;
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  margin: 12px 0;
   overflow: hidden;
 }
 
-.roll-button-enhanced.bonus-roll::before {
-  content: '';
+.dice-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #28a745, #20c997);
+  border-radius: 4px;
+  transition: width 0.3s ease-in-out;
+}
+
+.dice-progress-text {
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 70%);
-  animation: shine 2s ease-in-out infinite;
+  top: -25px;
+  right: 0;
+  font-size: 12px;
+  color: #6c757d;
+  font-weight: 500;
 }
 
-@keyframes shine {
-  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-  100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+.dice-result-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  transition: all 0.2s ease-in-out;
 }
 
-/* Current Dice Display Enhanced */
+.dice-result-item.used {
+  background: #f8f9fa;
+  border-color: #28a745;
+  opacity: 0.7;
+}
+
+.dice-result-item.available {
+  background: #fff3cd;
+  border-color: #ffc107;
+}
+
+.dice-result-item.next-to-use {
+  background: #d4edda;
+  border-color: #28a745;
+  animation: next-dice-pulse 2s infinite;
+  box-shadow: 0 0 12px rgba(40, 167, 69, 0.3);
+}
+
+@keyframes next-dice-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 12px rgba(40, 167, 69, 0.3);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 16px rgba(40, 167, 69, 0.5);
+  }
+}
+
+.roll-number {
+  font-size: 10px;
+  font-weight: bold;
+  color: #495057;
+  margin-top: 4px;
+}
+
+.usage-status {
+  font-size: 10px;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.usage-status.used {
+  color: #28a745;
+}
+
+.usage-status.available {
+  color: #ffc107;
+}
+
 .current-dice-display h4 {
-  margin: 0 0 16px 0;
-  color: #2e7d32;
-  font-size: 1.2rem;
-  font-weight: 600;
+  margin-bottom: 16px;
+  color: #495057;
+  font-size: 14px;
   text-align: center;
-  border-bottom: 2px solid rgba(46, 125, 50, 0.2);
-  padding-bottom: 8px;
+}
+
+.dice-summary {
+  margin-top: 16px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 4px solid #007bff;
+}
+
+.dice-summary p {
+  margin: 4px 0;
+  font-size: 12px;
+  color: #495057;
+}
+
+.dice-summary p strong {
+  color: #007bff;
+  font-weight: 600;
+}
+
+/* Enhanced dice usage display styles */
+.dice-results-overview {
+  text-align: center;
+  margin: 12px 0;
+  padding: 8px;
+  background: rgba(33, 150, 243, 0.1);
+  border-radius: 6px;
+  border: 1px solid rgba(33, 150, 243, 0.2);
+}
+
+.dice-results-overview h5 {
+  margin: 0;
+  color: #1976d2;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.dice-results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.dice-result-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+}
+
+.dice-result-item.used {
+  background: rgba(76, 175, 80, 0.1);
+  border-color: #4caf50;
+  opacity: 0.8;
+}
+
+.dice-result-item.available {
+  background: rgba(255, 193, 7, 0.1);
+  border-color: #ffc107;
+  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+}
+
+.dice-result-item.next-to-use {
+  background: rgba(33, 150, 243, 0.15);
+  border-color: #2196f3;
+  animation: next-dice-pulse 2s infinite;
+  box-shadow: 0 0 12px rgba(33, 150, 243, 0.3);
+}
+
+.roll-number, .dice-value {
+  font-size: 11px;
+  color: #666;
+  margin: 2px 0;
+  font-weight: 500;
+}
+
+.usage-status {
+  font-size: 10px;
+  font-weight: bold;
+  margin: 4px 0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.usage-status.used {
+  background: #4caf50;
+  color: white;
+}
+
+.usage-status.available {
+  background: #ffc107;
+  color: #333;
+}
+
+.used-timestamp {
+  font-size: 9px;
+  color: #777;
+  font-style: italic;
+}
+
+.dice-progress-section {
+  margin: 16px 0;
+}
+
+.dice-progress-text {
+  text-align: center;
+  font-size: 12px;
+  color: #555;
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+.dice-summary {
+  background: #f5f5f5;
+  padding: 12px;
+  border-radius: 6px;
+  border-left: 4px solid #2196f3;
+  margin-top: 16px;
+}
+
+.dice-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 6px 0;
+  font-size: 13px;
+}
+
+.dice-summary-row.highlight {
+  background: rgba(33, 150, 243, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.summary-label {
+  color: #555;
+  font-weight: 500;
+}
+
+.summary-value {
+  color: #333;
+  font-weight: 600;
+}
+
+.summary-value.next-dice {
+  background: #2196f3;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.no-dice-display {
+  text-align: center;
+  padding: 20px;
+  background: rgba(158, 158, 158, 0.1);
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.no-dice-display p {
+  margin: 0;
+  color: #666;
+  font-style: italic;
+}
+
+/* Enhanced animations */
+@keyframes next-dice-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 12px rgba(33, 150, 243, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(33, 150, 243, 0.5);
+  }
 }
 
 /* Responsive Design */

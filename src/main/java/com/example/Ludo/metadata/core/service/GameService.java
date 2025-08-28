@@ -31,13 +31,11 @@ public class GameService {
   private final Random random = new Random();
 
   public GameStateDTO createGame() {
-    System.out.println("🎮 [GameService] Creating new game");
     try {
       GameState game = createGameInternal();
-      System.out.println("✅ [GameService] Game created successfully - GameId: " + game.getGameId());
       return GameStateMapper.mapToDTO(game);
     } catch (Exception e) {
-      System.out.println("❌ [GameService] Failed to create game: " + e.getMessage());
+      System.out.println("❌ Failed to create game: " + e.getMessage());
       throw e;
     }
   }
@@ -58,7 +56,6 @@ public class GameService {
     );
 
     games.put(gameId, newGame);
-    System.out.println("💾 [GameService] Game stored - ID: " + gameId + ", Total games: " + games.size());
     return newGame;
   }
 
@@ -131,24 +128,19 @@ public class GameService {
   }
 
   public GameStateDTO rollTheDice(String gameId, int playerIndex) {
-    System.out.println("🎲 [GameService] Dice roll request - GameId: " + gameId + ", PlayerIndex: " + playerIndex);
-
     GameState game = games.get(gameId);
     if (game == null) {
-      System.out.println("❌ [GameService] Game not found: " + gameId);
       throw new GameNotFoundException("Game not found");
     }
 
     String currentPlayerName = game.getPlayers().size() > playerIndex ? game.getPlayers().get(playerIndex).getName() : "Unknown";
 
     if (!game.isStarted()) {
-      System.out.println("❌ [GameService] Game not started");
       throw new InvalidActionException("Game has not started yet");
     }
 
     if (!isCurrentPlayer(game, playerIndex)) {
       String currentTurnPlayer = game.getPlayers().get(game.getCurrentPlayerIndex()).getName();
-      System.out.println("❌ [GameService] Wrong turn - Current: " + currentTurnPlayer + ", Requested: " + currentPlayerName);
       throw new InvalidActionException("It's not your turn! Current turn belongs to: " + currentTurnPlayer);
     }
 
@@ -159,14 +151,13 @@ public class GameService {
       long rollCount = rolls.size();
 
       if (!(lastRoll.isSix() && rollCount < 3)) {
-        System.out.println("❌ [GameService] Cannot roll again - Last: " + lastRoll.getMove() + ", Count: " + rollCount);
         throw new InvalidActionException("You can only roll again if the previous roll was a six and less than 3 rolls in this turn");
       }
     }
 
     diceService.rollDice(game, playerIndex);
     Dice latestDice = game.getCurrentDiceRolls().get(game.getCurrentDiceRolls().size() - 1);
-    System.out.println("🎯 [GameService] " + currentPlayerName + " rolled: " + latestDice.getMove());
+    System.out.println("🎲 " + currentPlayerName + " rolled: " + latestDice.getMove());
 
     // Record last dice roll for display (even if turn changes)
     game.setLastDiceRoll(LastDiceRoll.builder()
@@ -176,18 +167,14 @@ public class GameService {
         .rollId(game.getGameId() + "-" + playerIndex + "-" + System.currentTimeMillis())
         .build());
 
-    // ✅ ENHANCED: Better debugging and null safety for turn change logic
     List<Token> tokens = game.getPlayerPositions().get(playerIndex);
 
     if (tokens == null) {
-      System.out.println("❌ [GameService] " + currentPlayerName + " - No tokens found for player index: " + playerIndex);
-      System.out.println("📊 [GameService] Available player positions: " + game.getPlayerPositions().keySet());
       // Try to recover by checking if tokens exist under color index
       String playerColor = game.getPlayers().get(playerIndex).getColor();
       Color color = Color.valueOf(playerColor);
       tokens = game.getPlayerPositions().get(color.getPlayerIndex());
       if (tokens != null) {
-        System.out.println("🔧 [GameService] Found tokens under color index: " + color.getPlayerIndex());
         // Fix the mapping
         game.getPlayerPositions().put(playerIndex, tokens);
         game.getPlayerPositions().remove(color.getPlayerIndex());
@@ -196,28 +183,35 @@ public class GameService {
 
     boolean allAtHome = tokens != null && tokens.stream().allMatch(t -> t.getCurrentPosition() == -1);
 
-    System.out.println("🏠 [GameService] " + currentPlayerName + " - All tokens at home: " + allAtHome + ", Dice: " + latestDice.getMove());
-    if (tokens != null) {
-      System.out.println("📊 [GameService] " + currentPlayerName + " token positions: " +
-        tokens.stream().map(t -> t.getCurrentPosition()).toList());
-    } else {
-      System.out.println("❌ [GameService] " + currentPlayerName + " - tokens is null!");
+    // Check if player has any usable dice (6s for opening tokens, or any dice if tokens are open)
+    boolean hasUsableDice = false;
+    for (Dice dice : game.getCurrentDiceRolls()) {
+      if (!dice.isUsed()) {
+        // If player has tokens on board, any unused dice is usable
+        if (!allAtHome) {
+          hasUsableDice = true;
+          break;
+        }
+        // If all tokens at home, only 6s are usable
+        if (dice.getMove() == 6) {
+          hasUsableDice = true;
+          break;
+        }
+      }
     }
 
-    // ✅ FIXED: Consistent turn change logic for all players
-    if (allAtHome && latestDice.getMove() != 6) {
-      System.out.println("🔄 [GameService] " + currentPlayerName + " - All tokens home + no 6 = turn change");
+    // Only change turn if player has no usable dice AND last roll wasn't a 6
+    if (allAtHome && !hasUsableDice && latestDice.getMove() != 6) {
+      System.out.println("🔄 " + currentPlayerName + " turn ends (no usable dice)");
       game.getCurrentDiceRolls().clear();
       ludoRule.changeTurn(game);
-      System.out.println("✅ [GameService] Turn changed from " + currentPlayerName + " to " + game.getPlayers().get(game.getCurrentPlayerIndex()).getName());
     }
 
-    // ✅ ENHANCED: Better three sixes handling
+    // Three sixes handling
     if (handleThreeSixesScenario(game)) {
-      System.out.println("🚫 [GameService] " + currentPlayerName + " - Three sixes - turn change");
+      System.out.println("🚫 " + currentPlayerName + " turn ends (three sixes)");
       game.getCurrentDiceRolls().clear();
       ludoRule.changeTurn(game);
-      System.out.println("✅ [GameService] Turn changed due to three sixes");
     }
 
     return GameStateMapper.mapToDTO(game);
@@ -270,6 +264,27 @@ public class GameService {
     diceToUse.setUsed(true);
     cleanCurrentDiceRolls(game);
     ludoRule.cutIfPossible(game, movedToken);
+
+    // ✅ ADDED: Check if turn should end after token move
+    List<Dice> remainingDice = game.getCurrentDiceRolls();
+    boolean hasUnusedDice = remainingDice.stream().anyMatch(d -> !d.isUsed());
+
+    if (!hasUnusedDice) {
+      // All dice used - check if player gets another turn due to sixes
+      boolean hasSixes = remainingDice.stream().anyMatch(Dice::isSix);
+      if (!hasSixes) {
+        // No sixes, turn ends
+        String currentPlayerName = game.getPlayers().get(playerIndex).getName();
+        System.out.println("🔄 [GameService] " + currentPlayerName + " - All dice used, no sixes = turn change");
+        game.getCurrentDiceRolls().clear();
+        ludoRule.changeTurn(game);
+        System.out.println("✅ [GameService] Turn changed from " + currentPlayerName + " to " + game.getPlayers().get(game.getCurrentPlayerIndex()).getName());
+      } else {
+        // Has sixes, clear dice for next roll but keep turn
+        System.out.println("🎲 [GameService] " + game.getPlayers().get(playerIndex).getName() + " - All dice used but has sixes, can roll again");
+        game.getCurrentDiceRolls().clear();
+      }
+    }
 
     // Check for win
     if (game.hasPlayerWon(playerIndex)) {

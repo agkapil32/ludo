@@ -9,10 +9,10 @@ const BoardSVG: React.FC<BoardSVGProps> = ({ size = 600 }) => {
 
   // Enhanced player colors with gradients and better contrast
   const playerColors = {
-    red: '#FF0000',     // 🟥 Pure red
-    green: '#00A550',   // 🟩 Rich green (darker, nicer than plain #00FF00)
-    blue: '#0000FF',    // 🟦 Pure blue
-    yellow: '#FFD700'   // 🟨 Golden yellow (rich instead of pale)
+    red: '#EB1C24',     // Red
+    green: '#02A04B',   // Green
+    blue: '#22409A',    // Blue
+    yellow: '#FFE013'   // Yellow
   };
 
   // Corrected Ludo board path - 52 squares total following proper Ludo rules
