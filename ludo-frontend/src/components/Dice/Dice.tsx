@@ -221,7 +221,7 @@ const Dice: React.FC = () => {
     const { move, playerIndex, timestamp, rollId } = diceData.lastDiceRoll;
     const currentRollId = `last-${move}-${playerIndex}-${timestamp ?? ''}-${rollId ?? ''}`;
 
-    if currentRollId === lastRollIdRef.current) return;
+    if(currentRollId === lastRollIdRef.current) return;
     lastRollIdRef.current = currentRollId;
 
     const now = Date.now();
